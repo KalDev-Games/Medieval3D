@@ -1966,6 +1966,10 @@ MonoBehaviour:
   worldTiles:
   - {fileID: 8035275247816700201, guid: 3f0d882f9f040164eac53edc2ad64622, type: 3}
   - {fileID: 2914061460743326320, guid: 7cb601b7b24297240bc7b3d97f565708, type: 3}
+  - {fileID: 8092931255583014149, guid: 20cb76bb53e512f498af17c7dbc1f27d, type: 3}
+  - {fileID: 6169284232358461909, guid: 830858f5ba377104eb80405053f56a47, type: 3}
+  - {fileID: 8001702576453241147, guid: 4f11540790278dd4484f2b970a541273, type: 3}
+  - {fileID: 135467297864129915, guid: 6794723278e25ed4aa48df9ea3e5bb48, type: 3}
   worldSize: 256
   updatedTiles: []
   differenceX: 0

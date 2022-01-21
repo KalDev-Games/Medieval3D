@@ -12,7 +12,7 @@ public class WorldGenerator : MonoBehaviour
     private List<GameObject> worldTiles;
     [SerializeField]
     private int worldSize = 256;
-    public static int worldHeight = 4;
+    public static int worldHeight = 8;
     [SerializeField]
     //Stufenweise
     private static int viewDistance = 4;
@@ -74,11 +74,27 @@ public class WorldGenerator : MonoBehaviour
                    
                     if (z > 0)
                     {
-                        model[x + median, y + median].SetTypeOfObject(z,0);
+                        int random = Random.Range(0, 100);
+                        if (random == 0)
+                        {
+                            model[x + median, y + median].SetTypeOfObject(z,0);
+                        }
+                        else if (random > 1 && random < 6 && z == 1)
+                        {
+                            model[x + median, y + median].SetTypeOfObject(z, random);
+                        }
+                        else if (random > 1 && random < 6 && z > 1 && model[x + median, y + median].getAllTypes()[z-1] > 1)
+                        {
+                            model[x + median, y + median].SetTypeOfObject(z, random);
+                        }
+
+
+                        
                     }
                     else
                     {
                         model[x + median, y + median].SetTypeOfObject(z, 1);
+
                     }
                 }
             }
@@ -192,21 +208,23 @@ public class WorldGenerator : MonoBehaviour
             case 1:
                 tile = worldTiles[1];
                 break;
+            case 2:
+                tile = worldTiles[2];
+                break;
+            case 3:
+                tile = worldTiles[3];
+                break;
+            case 4:
+                tile = worldTiles[4];
+                break;
+            case 5:
+                tile = worldTiles[5];
+                break;
             default:
                 return worldTiles[0];
         }
         return tile;
     }
 
-    //Do stuff when required
-    private void ThreadProc()
-    {
-        for (int i = 0; i < 10; i++)
-        {
-            Debug.Log("ThreadProc: {0}" + i);
-            // Yield the rest of the time slice.
-            Thread.Sleep(0);
-        }
-        
-    }
+    
 }
