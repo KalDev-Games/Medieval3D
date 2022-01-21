@@ -20,7 +20,6 @@ public class WorldGenerator : MonoBehaviour
     private static int viewDistance = 8;
 
     //The model of the world
-    public static GameObject[,,] world;
     public static Chunk[,] model;
 
     //current active chunks
@@ -33,8 +32,6 @@ public class WorldGenerator : MonoBehaviour
 
     [Header("Debugging")]
     [SerializeField]
-    private List<string> updatedTiles = new List<string>();
-    [SerializeField]
     private float differenceX;
     [SerializeField]
     private float differenceY;
@@ -43,9 +40,6 @@ public class WorldGenerator : MonoBehaviour
     [SerializeField]
     private int playerY;
 
-
-
-    private Thread thread;
 
     void Start()
     {
@@ -215,7 +209,7 @@ public class WorldGenerator : MonoBehaviour
                     GameObject go = Instantiate(SpawnObject(newChunks[i].getAllTypes()[j]), 
                         new Vector3(pos.x * 8, j * 8 - 8, pos.y * 8), 
                         Quaternion.identity);
-
+                    go.isStatic = true;
                     newChunks[i].AddTileToChunk(go, j);
 
                 }
@@ -226,7 +220,7 @@ public class WorldGenerator : MonoBehaviour
                     GameObject go = Instantiate(SpawnTree(newChunks[i].GetTypesOfProp()[j]),
                         new Vector3(pos.x * 8, 0, pos.y * 8), 
                         Quaternion.identity);
-
+                    go.isStatic = true;
                     newChunks[i].AddPropObject(go);
                 }
 
