@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public class WorldGenerator : MonoBehaviour
@@ -11,124 +12,201 @@ public class WorldGenerator : MonoBehaviour
     private List<GameObject> worldTiles;
     [SerializeField]
     private int worldSize = 256;
+    public static int worldHeight = 4;
     [SerializeField]
-    private int worldHeight = 16;
-    [SerializeField]
-    private int viewDistance = 8;
+    //Stufenweise
+    private static int viewDistance = 4;
 
     //The model of the world
     public static GameObject[,,] world;
+    public static Chunk[,] model;
 
     //current active chunks
-    private List<GameObject> seenTiles = new List<GameObject>();
+    private List<Chunk> seenChunks = new List<Chunk>();
 
-    private int lastX = 0;
-    private int lastY = 0;
+    private static int lastX = 0;
+    private static int lastY = 0;
 
-    public float differenceX;
-    public float differenceY;
+    
 
+    [Header("Debugging")]
+    [SerializeField]
+    private List<string> updatedTiles = new List<string>();
+    [SerializeField]
+    private float differenceX;
+    [SerializeField]
+    private float differenceY;
+    [SerializeField]
+    private int playerX;
+    [SerializeField]
+    private int playerY;
+
+
+
+    private Thread thread;
 
     void Start()
     {
+        
+
         int median = worldSize / 2;
-        world = new GameObject[worldSize,worldHeight,worldSize];
+       
+        model = new Chunk[worldSize, worldSize];
+
+        for (int x = 0; x < worldSize; x++)
+        {
+            for (int y = 0; y < worldSize; y++)
+            {
+                model[x, y] = new Chunk();
+                model[x, y].SetCoordinates(x, y);
+            }  
+        }
+
+
+
         for (int x = -median; x < median; x++)
         {
             for (int y = -median; y < median; y++)
-            {
+            { 
+                model[x + median, y + median].SetCoordinates(x, y);
                 for (int z = 0; z < worldHeight; z++)
                 {
+                   
                     if (z > 0)
                     {
-                       
-                        GameObject go = new GameObject();
-                        go.transform.position = new Vector3(x * 8, 8 * z - 8, y * 8);
-                        go.transform.SetParent(transform);
-
-                        go.isStatic = true;
-                        world[x + median, z, y + median] = go;
-                    } else
-                    {
-                        GameObject go = Instantiate(worldTiles[0], new Vector3(x * 8, -8, y * 8), Quaternion.identity, transform);
-                        go.isStatic = true;
-                        world[x + median, z, y + median] = go;
+                        model[x + median, y + median].SetTypeOfObject(z,0);
                     }
-                    
+                    else
+                    {
+                        model[x + median, y + median].SetTypeOfObject(z, 1);
+                    }
                 }
-
-
-
-                
-              
-                
-                
             }
         }
+
         UpdateChunks(0, 0);
     }
+
+    public Thread StartTheThread(int param1, int param2)
+    {
+        var t = new Thread(() => UpdateChunks(param1, param2));
+        t.Start();
+        return t;
+    }
+
+  
+
+
 
     // Update is called once per frame
     void Update()
     {
         int playerX = (int)player.position.x;
-        int playerY = (int)player.position.z;
+        int playerY = (int)player.position.z; 
 
-        differenceX = Mathf.Abs(lastX - playerX);
-        differenceY = Mathf.Abs(lastY - playerY);
         if (Mathf.Abs(lastX - playerX)>=8 || Mathf.Abs(lastY - playerY) >= 8)
         {
-            UpdateChunks(playerX, playerY);
+            StartCoroutine(RunUpdate(playerX, playerY));
             lastX = playerX;
             lastY = playerY;
         }
         
-        
+    }
+
+
+    IEnumerator RunUpdate(int x, int y)
+    {
+        UpdateChunks (x,y);
+        yield return null;
     }
 
     private void UpdateChunks(int playerX, int playerY)
     {
         int median = worldSize / 2;
-        List<GameObject> newTiles = new List<GameObject>();
+        List<Chunk> newChunks = new List<Chunk>();
+        int viewDistance = WorldGenerator.viewDistance * 2;
+
+        int chunkX;
+        int chunkY;
+
+        //Check which chunks are need to be seen
         try
         {
-            for (int i = -viewDistance; i < viewDistance; i++)
+            for (int x = -viewDistance; x <= viewDistance; x++)
             {
-                for (int j = -viewDistance; j < viewDistance; j++)
+                for (int y = -viewDistance; y <= viewDistance; y++)
                 {
-                    for (int k = 0; k < worldHeight; k++)
-                    {
-                        int x = playerX / 8 + i;
-                        int y = playerY / 8 + j;
-
-                        GameObject tile = world[x + median, k, y + median];
-                        newTiles.Add(tile);
-                    }
+                    chunkX = playerX / 8 + x;
+                    chunkY = playerY / 8 + y;
+                    newChunks.Add(model[chunkX + median, chunkY + median]); //all visbible chunks are in this list
                     
                 }
             }
         }
         catch (System.IndexOutOfRangeException)
         {
-            Debug.Log("No field to find");
+            throw;
         }
 
-        
-
-        foreach (var item in seenTiles)
+        //Destroy chunks which are not visible anymore
+        int length = seenChunks.Count;
+        for (int i = 0; i < length; i++)
         {
-            if (!newTiles.Contains(item))
+            if (!newChunks.Contains(seenChunks[i]))
             {
-                item.SetActive(false);
-
+                for (int j = 0; j < seenChunks[i].GetAllObjectsOfChunk().Length; j++)
+                {
+                    Destroy(seenChunks[i].GetAllObjectsOfChunk()[j].gameObject);
+                }
             }
         }
 
-        seenTiles = newTiles;
-
-        foreach (var item in seenTiles)
+        //Spawn new chunks
+        length = newChunks.Count;
+        for (int i = 0; i < length; i++)
         {
-            item.SetActive(true);
+            for (int j = 0; j < newChunks[i].GetAllObjectsOfChunk().Length; j++)
+            {
+                if (!seenChunks.Contains(newChunks[i]))
+                {
+                    Vector2 pos = newChunks[i].GetCoordinates();
+                    GameObject go = Instantiate(SpawnObject(newChunks[i].getAllTypes()[j]), new Vector3(pos.x * 8, j * 8 - 8, pos.y * 8), Quaternion.identity);
+                    newChunks[i].AddTileToChunk(go, j);
+                }
+                
+            }
         }
+
+        seenChunks = newChunks;
+
+    }    
+
+    private GameObject SpawnObject(int type)
+    {
+        GameObject tile;
+        switch (type)
+        {
+            case 0:
+                tile = worldTiles[0];
+                break;
+            case 1:
+                tile = worldTiles[1];
+                break;
+            default:
+                return worldTiles[0];
+        }
+        return tile;
+    }
+
+    //Do stuff when required
+    private void ThreadProc()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            Debug.Log("ThreadProc: {0}" + i);
+            // Yield the rest of the time slice.
+            Thread.Sleep(0);
+        }
+        
     }
 }
