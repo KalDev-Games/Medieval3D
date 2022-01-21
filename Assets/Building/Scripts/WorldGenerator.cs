@@ -11,6 +11,8 @@ public class WorldGenerator : MonoBehaviour
     [SerializeField]
     private List<GameObject> worldTiles;
     [SerializeField]
+    private List<GameObject> treePrefabs;
+    [SerializeField]
     private int worldSize = 256;
     public static int worldHeight = 8;
     [SerializeField]
@@ -75,9 +77,18 @@ public class WorldGenerator : MonoBehaviour
                     if (z > 0)
                     {
                         int random = Random.Range(0, 50);
-                        if (random == 0)
+                        int randomTrees = Random.Range(0, 3);
+                        int randomAmount = Random.Range(5, 20);
+                        int shouldThereBeTrees = Random.Range(0, 100);
+
+                        if ((random == 0 || random >= 7) && z == 0 && randomTrees <= 3)
                         {
                             model[x + median, y + median].SetTypeOfObject(z,0);
+                        }
+                        else if (random == 0 && z == 0)
+                        {
+                            
+                            model[x + median, y + median].SetTypeOfObject(z, 0);
                         }
                         else if (random > 1 && random < 7 && z == 1)
                         {
@@ -87,9 +98,18 @@ public class WorldGenerator : MonoBehaviour
                         {
                             model[x + median, y + median].SetTypeOfObject(z, random);
                         }
-
-
+                        else if(z== 1 && shouldThereBeTrees % 20 == 0)
+                        {
+                            for (int i = 0; i < randomAmount; i++)
+                            {
+                                int xPos = Random.Range(-4, 4);
+                                int yPos = Random.Range(-4, 4);
+                                model[x + median, y + median].SetUpNewProp(randomTrees, new Vector2(xPos + x, yPos + y), 0);
+                            }
+                        }
                         
+
+
                     }
                     else
                     {
@@ -170,10 +190,16 @@ public class WorldGenerator : MonoBehaviour
         {
             if (!newChunks.Contains(seenChunks[i]))
             {
+
+                for (int j = 0; j < seenChunks[i].GetAllPropObjects().Count; j++)
+                {
+                    Destroy(seenChunks[i].GetAllPropObjects()[j].gameObject);
+                }
+
                 for (int j = 0; j < seenChunks[i].GetAllObjectsOfChunk().Length; j++)
                 {
                     Destroy(seenChunks[i].GetAllObjectsOfChunk()[j].gameObject);
-                }
+                } 
             }
         }
 
@@ -181,16 +207,32 @@ public class WorldGenerator : MonoBehaviour
         length = newChunks.Count;
         for (int i = 0; i < length; i++)
         {
-            for (int j = 0; j < newChunks[i].GetAllObjectsOfChunk().Length; j++)
+            if (!seenChunks.Contains(newChunks[i]))
             {
-                if (!seenChunks.Contains(newChunks[i]))
+                for (int j = 0; j < newChunks[i].GetAllObjectsOfChunk().Length; j++)
                 {
                     Vector2 pos = newChunks[i].GetCoordinates();
-                    GameObject go = Instantiate(SpawnObject(newChunks[i].getAllTypes()[j]), new Vector3(pos.x * 8, j * 8 - 8, pos.y * 8), Quaternion.identity);
+                    GameObject go = Instantiate(SpawnObject(newChunks[i].getAllTypes()[j]), 
+                        new Vector3(pos.x * 8, j * 8 - 8, pos.y * 8), 
+                        Quaternion.identity);
+
                     newChunks[i].AddTileToChunk(go, j);
+
                 }
-                
+
+                for (int j = 0; j < newChunks[i].GetTypesOfProp().Count; j++)
+                {
+                    Vector2 pos = newChunks[i].GetPositionsOfProps()[j];
+                    GameObject go = Instantiate(SpawnTree(newChunks[i].GetTypesOfProp()[j]),
+                        new Vector3(pos.x * 8, 0, pos.y * 8), 
+                        Quaternion.identity);
+
+                    newChunks[i].AddPropObject(go);
+                }
+
+
             }
+
         }
 
         seenChunks = newChunks;
@@ -229,5 +271,22 @@ public class WorldGenerator : MonoBehaviour
         return tile;
     }
 
+
+    private GameObject SpawnTree(int id)
+    {
+        switch (id)
+        {
+            case 0:
+                return treePrefabs[0];
+            case 1:
+                return treePrefabs[1];
+            case 2:
+                return treePrefabs[2];
+            case 3:
+                return treePrefabs[3];
+            default:
+                return treePrefabs[0];
+        }
+    }
     
 }

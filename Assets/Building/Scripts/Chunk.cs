@@ -8,11 +8,24 @@ public class Chunk
     private GameObject[] chunkObjects;
     private int[] typesOfObjects;
     private Vector2 position;
-    
+
+    //Props like trees, rocks,...
+    private List<int> props = new List<int>();
+    private List<Vector2> propPos = new List<Vector2>();
+    private List<float> propRotZ = new List<float>();
+    private List<GameObject> propObjects = new List<GameObject>();
+
     public Chunk()
     {
         chunkObjects = new GameObject[WorldGenerator.worldHeight];
         typesOfObjects = new int[WorldGenerator.worldHeight];
+    }
+
+    public void SetUpNewProp(int type, Vector2 position, float rotation)
+    {
+        props.Add(type);
+        propPos.Add(position);
+        propRotZ.Add(rotation);
     }
 
     public void AddTileToChunk(GameObject tile, int heightLevel)
@@ -24,6 +37,7 @@ public class Chunk
     {
         position = new Vector2(x, y);
     }
+
 
     public Vector2 GetCoordinates()
     {
@@ -43,5 +57,26 @@ public class Chunk
     public void SetTypeOfObject(int level, int type)
     {
         typesOfObjects[level] = type;
+    }
+
+    public List<GameObject> GetAllPropObjects()
+    {
+        return propObjects;
+    }
+
+    public void AddPropObject(GameObject gameObject)
+    {
+        propObjects.Add(gameObject);
+    }
+
+
+    public List<int> GetTypesOfProp()
+    {
+        return props;
+    }
+
+    public List<Vector2> GetPositionsOfProps()
+    {
+        return propPos;
     }
 }
