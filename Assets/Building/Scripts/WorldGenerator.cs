@@ -15,7 +15,7 @@ public class WorldGenerator : MonoBehaviour
     public static int worldHeight = 8;
     [SerializeField]
     //Stufenweise
-    private static int viewDistance = 4;
+    private static int viewDistance = 8;
 
     //The model of the world
     public static GameObject[,,] world;
@@ -74,16 +74,16 @@ public class WorldGenerator : MonoBehaviour
                    
                     if (z > 0)
                     {
-                        int random = Random.Range(0, 100);
+                        int random = Random.Range(0, 50);
                         if (random == 0)
                         {
                             model[x + median, y + median].SetTypeOfObject(z,0);
                         }
-                        else if (random > 1 && random < 6 && z == 1)
+                        else if (random > 1 && random < 7 && z == 1)
                         {
                             model[x + median, y + median].SetTypeOfObject(z, random);
                         }
-                        else if (random > 1 && random < 6 && z > 1 && model[x + median, y + median].getAllTypes()[z-1] > 1)
+                        else if (random > 1 && random < 7 && z > 1 && model[x + median, y + median].getAllTypes()[z-1] > 1)
                         {
                             model[x + median, y + median].SetTypeOfObject(z, random);
                         }
@@ -219,6 +219,9 @@ public class WorldGenerator : MonoBehaviour
                 break;
             case 5:
                 tile = worldTiles[5];
+                break;
+            case 6:
+                tile = worldTiles[6];
                 break;
             default:
                 return worldTiles[0];
