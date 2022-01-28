@@ -25,6 +25,10 @@ public class GCS : MonoBehaviour
     private Chunk chunk;
     private Quaternion rotation;  
     private int height;
+
+
+    // TODO: Change building from chunk-based to ray-based
+
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -50,10 +54,60 @@ public class GCS : MonoBehaviour
         controller.NotMovementActions.RotateObject.performed += RotateObject;
     }
 
+    void Update()
+    {
+        if (enableBuilding)
+        {
+            //Calculate Chunk
+            int playerXPos = (int)(transform.position.x / WorldGenerator.offsetXZ);
+            int playerYPos = (int)(transform.position.z / WorldGenerator.offsetXZ);
+
+            playerRotation = Mathf.Abs(transform.rotation.eulerAngles.y) % 360;
+            int median = WorldGenerator.GetWorldSizeMedian();
+            try
+            {
+                if ((playerRotation < 45 && playerRotation > 0) || playerRotation >= 315)
+                {
+                    //Debug.LogWarning("Schaue nach vorn");
+                    chunk = WorldGenerator.model[playerXPos + median, playerYPos + median + 1];
+                    MoveChunks(chunk);
+                }
+                else if (playerRotation >= 45 && playerRotation < 135)
+                {
+                    //Debug.LogWarning("Schaue nach links");
+                    chunk = WorldGenerator.model[playerXPos + median + 1, playerYPos + median];
+                    MoveChunks(chunk);
+                }
+                else if (playerRotation >= 135 && playerRotation < 225)
+                {
+                    Debug.LogWarning("Schaue nach hinten");
+                    chunk = WorldGenerator.model[playerXPos + median, playerYPos + median - 1];
+                    MoveChunks(chunk);
+                }
+                else if (playerRotation >= 225 && playerRotation < 315)
+                {
+                    Debug.LogWarning("Schaue nach rechts");
+                    chunk = WorldGenerator.model[playerXPos + median - 1, playerYPos + median];
+                    MoveChunks(chunk);
+                }
+                Debug.Log(chunk.GetPosOfChunk());
+                //lastPos = new Vector2(playerXPos, playerYPos);
+            }
+            catch (System.IndexOutOfRangeException)
+            {
+                throw;
+            }
+
+
+
+
+
+        }
+    }
 
     private void RotateObject(InputAction.CallbackContext ctx)
     {
-        rotation = Quaternion.AngleAxis(90, Vector3.up);
+        rotation = Quaternion.AngleAxis(rotation.eulerAngles.y + 90, Vector3.up);
     }
 
     private void Build(InputAction.CallbackContext ctx)
@@ -113,55 +167,7 @@ public class GCS : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        if (enableBuilding)
-        {
-            //Calculate Chunk
-            int playerXPos = (int)(transform.position.x / WorldGenerator.offsetXZ);
-            int playerYPos = (int)(transform.position.z / WorldGenerator.offsetXZ);
-
-            playerRotation = Mathf.Abs(transform.rotation.eulerAngles.y) % 360;
-            int median = WorldGenerator.GetWorldSizeMedian();
-            try
-            {
-                if ((playerRotation < 45 && playerRotation > 0) || playerRotation >= 315)
-                {
-                    Debug.LogWarning("Schaue nach vorn");
-                    chunk = WorldGenerator.model[playerXPos + median, playerYPos + median + 1];
-                    MoveChunks(chunk);
-                }
-                else if (playerRotation >= 45 && playerRotation < 135)
-                {
-                    Debug.LogWarning("Schaue nach links");
-                    chunk = WorldGenerator.model[playerXPos + median + 1, playerYPos + median];
-                    MoveChunks(chunk);
-                }
-                else if (playerRotation >= 135 && playerRotation < 225)
-                {
-                    Debug.LogWarning("Schaue nach hinten");
-                    chunk = WorldGenerator.model[playerXPos + median, playerYPos + median - 1];
-                    MoveChunks(chunk);
-                }
-                else if (playerRotation >= 225 && playerRotation < 315)
-                {
-                    Debug.LogWarning("Schaue nach rechts");
-                    chunk = WorldGenerator.model[playerXPos + median - 1, playerYPos + median];
-                    MoveChunks(chunk);
-                }
-                //lastPos = new Vector2(playerXPos, playerYPos);
-            }
-            catch (System.IndexOutOfRangeException)
-            {
-                throw;
-            }
-
-           
-
-            
-
-        }
-    }
+    
 
     private void MoveChunks(Chunk chunk)
     {
@@ -172,15 +178,18 @@ public class GCS : MonoBehaviour
             {
                 if (localObject == null)
                 {
+                    Debug.Log(chunk.GetPosOfChunk());
                     localObject = Instantiate(avaliableObjectsToBuild[index],
-                    new Vector3(chunk.GetPosOfChunk().x, height * WorldGenerator.offsetY - WorldGenerator.offsetY, chunk.GetPosOfChunk().y),
-                    Quaternion.identity);
+                    new Vector3(chunk.GetPosOfChunk().x * WorldGenerator.offsetXZ, height * WorldGenerator.offsetY - WorldGenerator.offsetY, chunk.GetPosOfChunk().y * WorldGenerator.offsetXZ),
+                    rotation);
+                    localObject.name = "local";
                 }
                 else
                 {
-                    localObject.transform.position = new Vector3(chunk.GetPosOfChunk().x, height * WorldGenerator.offsetY - WorldGenerator.offsetY, chunk.GetPosOfChunk().y);
+                    localObject.transform.position = new Vector3(chunk.GetPosOfChunk().x * WorldGenerator.offsetXZ, height * WorldGenerator.offsetY - WorldGenerator.offsetY, chunk.GetPosOfChunk().y * WorldGenerator.offsetXZ);
+                    localObject.transform.rotation = rotation;
                 }
-                break;
+                return;
             }
         }
     }
