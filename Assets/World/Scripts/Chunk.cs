@@ -20,6 +20,7 @@ public class Chunk
     {
         chunkObjects = new GameObject[WorldGenerator.worldHeight];
         typesOfObjects = new int[WorldGenerator.worldHeight];
+        rotationOfLayers = new Quaternion[WorldGenerator.worldHeight];
     }
 
     public Quaternion[] GetAllRotations()
