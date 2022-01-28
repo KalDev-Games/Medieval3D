@@ -59,6 +59,11 @@ public class Chunk
         typesOfObjects[level] = type;
     }
 
+    public Vector2 GetPosOfChunk()
+    {
+        return position;
+    }
+
     public List<GameObject> GetAllPropObjects()
     {
         return propObjects;

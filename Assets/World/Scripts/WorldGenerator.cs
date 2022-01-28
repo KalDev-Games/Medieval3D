@@ -10,12 +10,18 @@ public class WorldGenerator : MonoBehaviour
     private Transform player;
     [SerializeField]
     private List<GameObject> worldTiles;
+    public static List<GameObject> sWorldTiles;
     [SerializeField]
     private List<GameObject> treePrefabs;
+    private static List<GameObject> sTreePrefabs;
     [SerializeField]
-    private int worldSize = 256;
+    private static int worldSize = 256;
     public static int worldHeight = 8;
     [SerializeField]
+
+    public static int offsetXZ = 8;
+    public static int offsetY = 8;
+
     //Stufenweise
     private static int viewDistance = 8;
 
@@ -28,6 +34,11 @@ public class WorldGenerator : MonoBehaviour
     private static int lastX = 0;
     private static int lastY = 0;
 
+    private enum MyEnum
+    {
+        offline,
+        sd
+    }
     
 
     [Header("Debugging")]
@@ -41,9 +52,16 @@ public class WorldGenerator : MonoBehaviour
     private int playerY;
 
 
+    public static int GetWorldSizeMedian()
+    {
+        return worldSize / 2;
+    }
+
     void Start()
     {
         
+        sTreePrefabs = treePrefabs;
+        sWorldTiles = worldTiles;
 
         int median = worldSize / 2;
        
@@ -117,6 +135,7 @@ public class WorldGenerator : MonoBehaviour
         UpdateChunks(0, 0);
     }
 
+
     public Thread StartTheThread(int param1, int param2)
     {
         var t = new Thread(() => UpdateChunks(param1, param2));
@@ -141,6 +160,55 @@ public class WorldGenerator : MonoBehaviour
             lastY = playerY;
         }
         
+    }
+
+    
+
+    public static void RefreshChunk(int x, int y)
+    {
+        Chunk chunk = model[x + GetWorldSizeMedian(), y + GetWorldSizeMedian()];
+        Debug.LogWarning(chunk.GetPosOfChunk());
+
+        for (int i = 0; i < chunk.GetAllObjectsOfChunk().Length; i++)
+        {
+            chunk.GetAllObjectsOfChunk()[i].SetActive(false);
+        }
+
+        //Destroy
+        int length = chunk.GetAllPropObjects().Count;
+        for (int j = 0; j < length; j++)
+        {
+            Destroy(chunk.GetAllPropObjects()[j].gameObject);
+        }
+
+        length = chunk.GetAllObjectsOfChunk().Length;
+        for (int j = 0; j < length; j++)
+        {
+            Destroy(chunk.GetAllObjectsOfChunk()[j].gameObject);
+        }
+
+        //Rebuild
+        for (int j = 0; j < chunk.GetAllObjectsOfChunk().Length; j++)
+        {
+            Vector2 pos = chunk.GetCoordinates();
+            GameObject go = Instantiate(SpawnObject(chunk.getAllTypes()[j]),
+                new Vector3(pos.x * 8, j * 8 - 8, pos.y * 8),
+                Quaternion.identity);
+            go.isStatic = true;
+            chunk.AddTileToChunk(go, j);
+
+        }
+
+        for (int j = 0; j < chunk.GetTypesOfProp().Count; j++)
+        {
+            Vector2 pos = chunk.GetPositionsOfProps()[j];
+            GameObject go = Instantiate(SpawnTree(chunk.GetTypesOfProp()[j]),
+                new Vector3(pos.x * 8, 0, pos.y * 8),
+                Quaternion.identity);
+            go.isStatic = true;
+            chunk.AddPropObject(go);
+        }
+
     }
 
 
@@ -233,53 +301,53 @@ public class WorldGenerator : MonoBehaviour
 
     }    
 
-    private GameObject SpawnObject(int type)
+    private static GameObject SpawnObject(int type)
     {
         GameObject tile;
         switch (type)
         {
             case 0:
-                tile = worldTiles[0];
+                tile = sWorldTiles[0];
                 break;
             case 1:
-                tile = worldTiles[1];
+                tile = sWorldTiles[1];
                 break;
             case 2:
-                tile = worldTiles[2];
+                tile = sWorldTiles[2];
                 break;
             case 3:
-                tile = worldTiles[3];
+                tile = sWorldTiles[3];
                 break;
             case 4:
-                tile = worldTiles[4];
+                tile = sWorldTiles[4];
                 break;
             case 5:
-                tile = worldTiles[5];
+                tile = sWorldTiles[5];
                 break;
             case 6:
-                tile = worldTiles[6];
+                tile = sWorldTiles[6];
                 break;
             default:
-                return worldTiles[0];
+                return sWorldTiles[0];
         }
         return tile;
     }
 
 
-    private GameObject SpawnTree(int id)
+    private static GameObject SpawnTree(int id)
     {
         switch (id)
         {
             case 0:
-                return treePrefabs[0];
+                return sTreePrefabs[0];
             case 1:
-                return treePrefabs[1];
+                return sTreePrefabs[1];
             case 2:
-                return treePrefabs[2];
+                return sTreePrefabs[2];
             case 3:
-                return treePrefabs[3];
+                return sTreePrefabs[3];
             default:
-                return treePrefabs[0];
+                return sTreePrefabs[0];
         }
     }
     
