@@ -7,6 +7,7 @@ public class Chunk
     // Start is called before the first frame update
     private GameObject[] chunkObjects;
     private int[] typesOfObjects;
+    private Quaternion[] rotationOfLayers;
     private Vector2 position;
 
     //Props like trees, rocks,...
@@ -19,6 +20,16 @@ public class Chunk
     {
         chunkObjects = new GameObject[WorldGenerator.worldHeight];
         typesOfObjects = new int[WorldGenerator.worldHeight];
+    }
+
+    public Quaternion[] GetAllRotations()
+    {
+        return rotationOfLayers;
+    }
+
+    public void SetRotationOfLayer(Quaternion rotation, int level)
+    {
+        rotationOfLayers[level] = rotation;
     }
 
     public void SetUpNewProp(int type, Vector2 position, float rotation)

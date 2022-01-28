@@ -23,6 +23,7 @@ public class GCS : MonoBehaviour
 
     private GameObject localObject;
     private Chunk chunk;
+    private Quaternion rotation;  
     private int height;
     void Start()
     {
@@ -37,6 +38,7 @@ public class GCS : MonoBehaviour
         controller.NotMovementActions.EnableBuildingMode.Enable();
         controller.NotMovementActions.Switch.Enable();
         controller.NotMovementActions.PlaceObject.Enable();
+        controller.NotMovementActions.RotateObject.Enable();
     }
 
     private void Awake()
@@ -45,6 +47,13 @@ public class GCS : MonoBehaviour
         controller.NotMovementActions.EnableBuildingMode.performed += EnableBuildingMode;
         controller.NotMovementActions.Switch.performed += ChangeIndex;
         controller.NotMovementActions.PlaceObject.performed += Build;
+        controller.NotMovementActions.RotateObject.performed += RotateObject;
+    }
+
+
+    private void RotateObject(InputAction.CallbackContext ctx)
+    {
+        rotation = Quaternion.AngleAxis(90, Vector3.up);
     }
 
     private void Build(InputAction.CallbackContext ctx)
@@ -55,6 +64,7 @@ public class GCS : MonoBehaviour
             localObject = null;
             
             chunk.SetTypeOfObject(height,index + 2);
+            chunk.SetRotationOfLayer(rotation, height);
             Debug.LogWarning(chunk.GetPosOfChunk());
             WorldGenerator.RefreshChunk((int)chunk.GetPosOfChunk().x, (int)chunk.GetPosOfChunk().y);
         }

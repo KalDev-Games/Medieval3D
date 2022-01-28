@@ -92,10 +92,12 @@ public class WorldGenerator : MonoBehaviour
                         int randomTrees = Random.Range(0, 3);
                         int randomAmount = Random.Range(5, 20);
                         int shouldThereBeTrees = Random.Range(0, 100);
+                        int randomRot = Random.Range(0, 4);
 
                         if ((random == 0 || random >= 7) && z == 0 && randomTrees <= 3)
                         {
                             model[x + median, y + median].SetTypeOfObject(z,0);
+                            model[x + median, y + median].SetRotationOfLayer(Quaternion.AngleAxis(randomRot * 90,Vector3.up),z);
                         }
                         else if (random == 0 && z == 0)
                         {
@@ -275,8 +277,8 @@ public class WorldGenerator : MonoBehaviour
                 {
                     Vector2 pos = newChunks[i].GetCoordinates();
                     GameObject go = Instantiate(SpawnObject(newChunks[i].getAllTypes()[j]), 
-                        new Vector3(pos.x * 8, j * 8 - 8, pos.y * 8), 
-                        Quaternion.identity);
+                        new Vector3(pos.x * 8, j * 8 - 8, pos.y * 8),
+                        newChunks[i].GetAllRotations()[j]);
                     go.isStatic = true;
                     newChunks[i].AddTileToChunk(go, j);
 
