@@ -40,6 +40,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Eat",
+                    "type": "Button",
+                    "id": "722dbd63-c355-4e95-9d32-69be09db3167",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -95,6 +104,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "RotateObject",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9a1efc50-3a63-4bc2-a254-e327353d7c12",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Eat",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

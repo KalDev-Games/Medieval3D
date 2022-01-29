@@ -5,23 +5,12 @@ using UnityEngine;
 public class Ressource : MonoBehaviour
 {
     // Start is called before the first frame update
-    protected enum ressourceType
-    {
-        wood,
-        rock,
-        mushroom
-    }
-    protected int hitsNecessary;
-    protected int amountOfRessources;
-    protected ressourceType ressourceTyp;
 
 
+    protected int stackLimit;
+    
 
 
-    void Start()
-    {
-        
-    }
 
     
 }

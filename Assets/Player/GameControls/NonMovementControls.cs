@@ -62,6 +62,15 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Eat"",
+                    ""type"": ""Button"",
+                    ""id"": ""722dbd63-c355-4e95-9d32-69be09db3167"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -119,6 +128,17 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
                     ""action"": ""RotateObject"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9a1efc50-3a63-4bc2-a254-e327353d7c12"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Eat"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -131,6 +151,7 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
         m_NotMovementActions_Switch = m_NotMovementActions.FindAction("Switch", throwIfNotFound: true);
         m_NotMovementActions_PlaceObject = m_NotMovementActions.FindAction("PlaceObject", throwIfNotFound: true);
         m_NotMovementActions_RotateObject = m_NotMovementActions.FindAction("RotateObject", throwIfNotFound: true);
+        m_NotMovementActions_Eat = m_NotMovementActions.FindAction("Eat", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -194,6 +215,7 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
     private readonly InputAction m_NotMovementActions_Switch;
     private readonly InputAction m_NotMovementActions_PlaceObject;
     private readonly InputAction m_NotMovementActions_RotateObject;
+    private readonly InputAction m_NotMovementActions_Eat;
     public struct NotMovementActionsActions
     {
         private @NonMovementControls m_Wrapper;
@@ -202,6 +224,7 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
         public InputAction @Switch => m_Wrapper.m_NotMovementActions_Switch;
         public InputAction @PlaceObject => m_Wrapper.m_NotMovementActions_PlaceObject;
         public InputAction @RotateObject => m_Wrapper.m_NotMovementActions_RotateObject;
+        public InputAction @Eat => m_Wrapper.m_NotMovementActions_Eat;
         public InputActionMap Get() { return m_Wrapper.m_NotMovementActions; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -223,6 +246,9 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
                 @RotateObject.started -= m_Wrapper.m_NotMovementActionsActionsCallbackInterface.OnRotateObject;
                 @RotateObject.performed -= m_Wrapper.m_NotMovementActionsActionsCallbackInterface.OnRotateObject;
                 @RotateObject.canceled -= m_Wrapper.m_NotMovementActionsActionsCallbackInterface.OnRotateObject;
+                @Eat.started -= m_Wrapper.m_NotMovementActionsActionsCallbackInterface.OnEat;
+                @Eat.performed -= m_Wrapper.m_NotMovementActionsActionsCallbackInterface.OnEat;
+                @Eat.canceled -= m_Wrapper.m_NotMovementActionsActionsCallbackInterface.OnEat;
             }
             m_Wrapper.m_NotMovementActionsActionsCallbackInterface = instance;
             if (instance != null)
@@ -239,6 +265,9 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
                 @RotateObject.started += instance.OnRotateObject;
                 @RotateObject.performed += instance.OnRotateObject;
                 @RotateObject.canceled += instance.OnRotateObject;
+                @Eat.started += instance.OnEat;
+                @Eat.performed += instance.OnEat;
+                @Eat.canceled += instance.OnEat;
             }
         }
     }
@@ -249,5 +278,6 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
         void OnSwitch(InputAction.CallbackContext context);
         void OnPlaceObject(InputAction.CallbackContext context);
         void OnRotateObject(InputAction.CallbackContext context);
+        void OnEat(InputAction.CallbackContext context);
     }
 }

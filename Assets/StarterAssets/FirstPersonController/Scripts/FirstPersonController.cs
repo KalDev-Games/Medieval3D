@@ -73,6 +73,8 @@ namespace StarterAssets
 
 		private const float _threshold = 0.01f;
 
+		private Player player;
+
 		private void Awake()
 		{
 			// get a reference to our main camera
@@ -84,6 +86,8 @@ namespace StarterAssets
 
 		private void Start()
 		{
+			player = GetComponent<Player>();
+
 			_controller = GetComponent<CharacterController>();
 			_input = GetComponent<StarterAssetsInputs>();
 
@@ -133,8 +137,30 @@ namespace StarterAssets
 		private void Move()
 		{
 			// set target speed based on move speed, sprint speed and if sprint is pressed
-			float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+			float targetSpeed;
+            if (_input.sprint && player.Endurance > 0)
+            {
+				targetSpeed = SprintSpeed;
+            }
+            else
+            {
+				targetSpeed = MoveSpeed;
 
+                if (player.Endurance < 100 )
+                {
+					player.Endurance += player.Regeneration.Evaluate(player.Hunger);
+					if (player.Endurance > 100)
+                    {
+						player.Endurance = 100;
+                    }
+				}
+				
+            }
+
+            if (targetSpeed == SprintSpeed)
+            {
+				player.Endurance -= player.EnduranceMinus;
+            }
 			// a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
 			// note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
