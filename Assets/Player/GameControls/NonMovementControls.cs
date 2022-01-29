@@ -141,6 +141,34 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""WorldInteraction"",
+            ""id"": ""16116c00-3353-4374-9631-10533f9efb49"",
+            ""actions"": [
+                {
+                    ""name"": ""GetRessource"",
+                    ""type"": ""Button"",
+                    ""id"": ""041dea90-427d-46ea-b7fc-d0875bf0b708"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""b00811e0-51f4-42d9-aadb-f2ebdc10522f"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""GetRessource"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -152,6 +180,9 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
         m_NotMovementActions_PlaceObject = m_NotMovementActions.FindAction("PlaceObject", throwIfNotFound: true);
         m_NotMovementActions_RotateObject = m_NotMovementActions.FindAction("RotateObject", throwIfNotFound: true);
         m_NotMovementActions_Eat = m_NotMovementActions.FindAction("Eat", throwIfNotFound: true);
+        // WorldInteraction
+        m_WorldInteraction = asset.FindActionMap("WorldInteraction", throwIfNotFound: true);
+        m_WorldInteraction_GetRessource = m_WorldInteraction.FindAction("GetRessource", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -272,6 +303,39 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
         }
     }
     public NotMovementActionsActions @NotMovementActions => new NotMovementActionsActions(this);
+
+    // WorldInteraction
+    private readonly InputActionMap m_WorldInteraction;
+    private IWorldInteractionActions m_WorldInteractionActionsCallbackInterface;
+    private readonly InputAction m_WorldInteraction_GetRessource;
+    public struct WorldInteractionActions
+    {
+        private @NonMovementControls m_Wrapper;
+        public WorldInteractionActions(@NonMovementControls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @GetRessource => m_Wrapper.m_WorldInteraction_GetRessource;
+        public InputActionMap Get() { return m_Wrapper.m_WorldInteraction; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(WorldInteractionActions set) { return set.Get(); }
+        public void SetCallbacks(IWorldInteractionActions instance)
+        {
+            if (m_Wrapper.m_WorldInteractionActionsCallbackInterface != null)
+            {
+                @GetRessource.started -= m_Wrapper.m_WorldInteractionActionsCallbackInterface.OnGetRessource;
+                @GetRessource.performed -= m_Wrapper.m_WorldInteractionActionsCallbackInterface.OnGetRessource;
+                @GetRessource.canceled -= m_Wrapper.m_WorldInteractionActionsCallbackInterface.OnGetRessource;
+            }
+            m_Wrapper.m_WorldInteractionActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @GetRessource.started += instance.OnGetRessource;
+                @GetRessource.performed += instance.OnGetRessource;
+                @GetRessource.canceled += instance.OnGetRessource;
+            }
+        }
+    }
+    public WorldInteractionActions @WorldInteraction => new WorldInteractionActions(this);
     public interface INotMovementActionsActions
     {
         void OnEnableBuildingMode(InputAction.CallbackContext context);
@@ -279,5 +343,9 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
         void OnPlaceObject(InputAction.CallbackContext context);
         void OnRotateObject(InputAction.CallbackContext context);
         void OnEat(InputAction.CallbackContext context);
+    }
+    public interface IWorldInteractionActions
+    {
+        void OnGetRessource(InputAction.CallbackContext context);
     }
 }

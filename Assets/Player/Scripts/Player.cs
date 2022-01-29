@@ -31,9 +31,19 @@ public class Player : MonoBehaviour
 
     private NonMovementControls controls;
 
+    [Header("Food & Ressource")]
     [SerializeField]
     private Food food;
+    [SerializeField]
+    private Materials material;
+    [SerializeField]
     private GameObject obj;
+
+    [Header("Inventory")]
+    [SerializeField]
+    private int stone;
+    [SerializeField]
+    private int wood;
 
     [Header("GUI")]
     [SerializeField]
@@ -47,12 +57,14 @@ public class Player : MonoBehaviour
     {
         controls = new NonMovementControls();
         controls.NotMovementActions.Eat.performed += Eat;
+        controls.WorldInteraction.GetRessource.performed += ClaimRessource;
 
     }
 
     void OnEnable()
     {
         controls.NotMovementActions.Eat.Enable();
+        controls.WorldInteraction.GetRessource.Enable();
     }
 
     void Start()
@@ -88,13 +100,18 @@ public class Player : MonoBehaviour
 
             if (hit.transform.GetComponent<Food>())
             {
-                Debug.Log(hit.transform.GetComponent<Food>().GetTypeOfFood());
                 food = hit.transform.GetComponent<Food>();
+                obj = hit.transform.gameObject;
+            }
+            else if (hit.transform.GetComponent<Materials>())
+            {
+                material = hit.transform.GetComponent<Materials>();
                 obj = hit.transform.gameObject;
             }
             else
             {
                 food = null;
+                material = null;
                 obj = null;
             }
             
@@ -123,6 +140,32 @@ public class Player : MonoBehaviour
 
             Destroy(obj);
             food = null;
+        }
+    }
+
+    private void ClaimRessource(InputAction.CallbackContext ctx)
+    {
+        
+        if (material != null && material.HitsTaken < material.HitsNecessary)
+        {
+            material.HitsTaken++;
+            
+
+        } else if (material != null && material.HitsTaken == material.HitsNecessary)
+        {
+            
+            if (material.GetType().ToString().Equals("Wood"))
+            {
+                wood += material.AmountOfRessources;
+              
+            }
+            else if (material.GetType().ToString().Equals("Rock"))
+            {
+                stone += material.AmountOfRessources;
+            }
+
+            Destroy(obj);
+            material = null;
         }
     }
 }

@@ -6,8 +6,9 @@ public class Wood : Materials
 {
     Wood()
     {
+        System.Random r = new System.Random();
         ressourceTyp = ressourceType.wood;
-        hitsNecessary = Random.Range(7, 10);
-        amountOfRessources = Random.Range(1, 5);
+        hitsNecessary = r.Next(3,5);
+        amountOfRessources = r.Next(3, 5);
     }
 }

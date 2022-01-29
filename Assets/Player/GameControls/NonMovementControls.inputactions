@@ -119,6 +119,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "WorldInteraction",
+            "id": "16116c00-3353-4374-9631-10533f9efb49",
+            "actions": [
+                {
+                    "name": "GetRessource",
+                    "type": "Button",
+                    "id": "041dea90-427d-46ea-b7fc-d0875bf0b708",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "b00811e0-51f4-42d9-aadb-f2ebdc10522f",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "GetRessource",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

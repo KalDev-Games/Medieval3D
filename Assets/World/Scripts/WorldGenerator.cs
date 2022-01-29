@@ -95,11 +95,11 @@ public class WorldGenerator : MonoBehaviour
                     {
                         int random = Random.Range(0, 50);
                         int randomTrees = Random.Range(0, sTreePrefabs.Count);
-                        int randomAmount = Random.Range(3, 10);
+                        int randomAmount = Random.Range(3, 4);
                         int shouldThereBeTrees = Random.Range(0, 20);
                         int randomRot = Random.Range(0, 4);
 
-                        Debug.Log(shouldThereBeTrees);
+                        
 
                         if ((random == 0 || random >= 7) && z == 0 && randomTrees <= 3)
                         {
@@ -124,9 +124,9 @@ public class WorldGenerator : MonoBehaviour
                             for (int i = 0; i < randomAmount; i++)
                             {
                                 int xPos = Random.Range(-4, 4);
-                                Debug.Log(xPos);
+                                
                                 int yPos = Random.Range(-4, 4);
-                                Debug.Log(yPos);
+                                
                                 model[x + median, y + median].SetUpNewProp(randomTrees, new Vector2(xPos + x * offsetXZ, yPos + y * offsetXZ), 0);
                             }
                         }
@@ -178,7 +178,7 @@ public class WorldGenerator : MonoBehaviour
     public static void RefreshChunk(int x, int y)
     {
         Chunk chunk = model[x + GetWorldSizeMedian(), y + GetWorldSizeMedian()];
-        Debug.LogWarning(chunk.GetPosOfChunk());
+        //Debug.LogWarning(chunk.GetPosOfChunk());
 
         for (int i = 0; i < chunk.GetAllObjectsOfChunk().Length; i++)
         {
