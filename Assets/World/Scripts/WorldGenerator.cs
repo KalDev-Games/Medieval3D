@@ -24,12 +24,14 @@ public class WorldGenerator : MonoBehaviour
 
     //Stufenweise
     private static int viewDistance = 8;
+    private static int viewDistanceProps = 4;
 
     //The model of the world
     public static Chunk[,] model;
 
     //current active chunks
-    private List<Chunk> seenChunks = new List<Chunk>();
+    private List<Chunk> seenChunksBuildings = new List<Chunk>();
+    private List<Chunk> seenChunksProps = new List<Chunk>();
 
     private static int lastX = 0;
     private static int lastY = 0;
@@ -50,7 +52,10 @@ public class WorldGenerator : MonoBehaviour
     private int playerX;
     [SerializeField]
     private int playerY;
-
+    [SerializeField]
+    private List<Chunk> newChunksBuildings;
+    [SerializeField]
+    private List<Chunk> newChunksProps;
 
     public static int GetWorldSizeMedian()
     {
@@ -89,10 +94,12 @@ public class WorldGenerator : MonoBehaviour
                     if (z > 0)
                     {
                         int random = Random.Range(0, 50);
-                        int randomTrees = Random.Range(0, 3);
-                        int randomAmount = Random.Range(5, 20);
-                        int shouldThereBeTrees = Random.Range(0, 100);
+                        int randomTrees = Random.Range(0, sTreePrefabs.Count);
+                        int randomAmount = Random.Range(3, 10);
+                        int shouldThereBeTrees = Random.Range(0, 20);
                         int randomRot = Random.Range(0, 4);
+
+                        Debug.Log(shouldThereBeTrees);
 
                         if ((random == 0 || random >= 7) && z == 0 && randomTrees <= 3)
                         {
@@ -112,13 +119,15 @@ public class WorldGenerator : MonoBehaviour
                         {
                             model[x + median, y + median].SetTypeOfObject(z, random);
                         }
-                        else if(z== 1 && shouldThereBeTrees % 20 == 0)
+                        else if(z== 1)
                         {
                             for (int i = 0; i < randomAmount; i++)
                             {
                                 int xPos = Random.Range(-4, 4);
+                                Debug.Log(xPos);
                                 int yPos = Random.Range(-4, 4);
-                                model[x + median, y + median].SetUpNewProp(randomTrees, new Vector2(xPos + x, yPos + y), 0);
+                                Debug.Log(yPos);
+                                model[x + median, y + median].SetUpNewProp(randomTrees, new Vector2(xPos + x * offsetXZ, yPos + y * offsetXZ), 0);
                             }
                         }
                         
@@ -205,7 +214,7 @@ public class WorldGenerator : MonoBehaviour
         {
             Vector2 pos = chunk.GetPositionsOfProps()[j];
             GameObject go = Instantiate(SpawnTree(chunk.GetTypesOfProp()[j]),
-                new Vector3(pos.x * 8, 0, pos.y * 8),
+                new Vector3(pos.x, 0, pos.y),
                 Quaternion.identity);
             go.isStatic = true;
             chunk.AddPropObject(go);
@@ -223,13 +232,14 @@ public class WorldGenerator : MonoBehaviour
     private void UpdateChunks(int playerX, int playerY)
     {
         int median = worldSize / 2;
-        List<Chunk> newChunks = new List<Chunk>();
+        newChunksBuildings = new List<Chunk>();
+        newChunksProps = new List<Chunk>();
         int viewDistance = WorldGenerator.viewDistance * 2;
 
         int chunkX;
         int chunkY;
 
-        //Check which chunks are need to be seen
+        //Check which chunks are need to be seen - Buildings
         try
         {
             for (int x = -viewDistance; x <= viewDistance; x++)
@@ -238,10 +248,16 @@ public class WorldGenerator : MonoBehaviour
                 {
                     chunkX = playerX / 8 + x;
                     chunkY = playerY / 8 + y;
-                    newChunks.Add(model[chunkX + median, chunkY + median]); //all visbible chunks are in this list
+
+                    if (Mathf.Abs(x) <= viewDistanceProps && Mathf.Abs(y) <= viewDistanceProps)
+                    {
+                        newChunksProps.Add(model[chunkX + median, chunkY + median]); //all visbible chunks are in this list
+                    } 
+                    newChunksBuildings.Add(model[chunkX + median, chunkY + median]); //all visbible chunks are in this list
                     
                 }
             }
+
         }
         catch (System.IndexOutOfRangeException)
         {
@@ -249,49 +265,55 @@ public class WorldGenerator : MonoBehaviour
         }
 
         //Destroy chunks which are not visible anymore
-        int length = seenChunks.Count;
+        int length = seenChunksBuildings.Count;
         for (int i = 0; i < length; i++)
         {
-            if (!newChunks.Contains(seenChunks[i]))
+            if (!newChunksBuildings.Contains(seenChunksBuildings[i]))
             {
 
-                for (int j = 0; j < seenChunks[i].GetAllPropObjects().Count; j++)
+
+                for (int j = 0; j < seenChunksBuildings[i].GetAllPropObjects().Count; j++)
                 {
-                    Destroy(seenChunks[i].GetAllPropObjects()[j].gameObject);
+                    Destroy(seenChunksBuildings[i].GetAllPropObjects()[j].gameObject);
                 }
 
-                for (int j = 0; j < seenChunks[i].GetAllObjectsOfChunk().Length; j++)
+                for (int j = 0; j < seenChunksBuildings[i].GetAllObjectsOfChunk().Length; j++)
                 {
-                    Destroy(seenChunks[i].GetAllObjectsOfChunk()[j].gameObject);
-                } 
+                    Destroy(seenChunksBuildings[i].GetAllObjectsOfChunk()[j].gameObject);
+                }
             }
         }
 
-        //Spawn new chunks
-        length = newChunks.Count;
+
+        length = newChunksBuildings.Count;
         for (int i = 0; i < length; i++)
         {
-            if (!seenChunks.Contains(newChunks[i]))
+            if (!seenChunksBuildings.Contains(newChunksBuildings[i]))
             {
-                for (int j = 0; j < newChunks[i].GetAllObjectsOfChunk().Length; j++)
+                //Generate new tiles
+                for (int j = 0; j < newChunksBuildings[i].GetAllObjectsOfChunk().Length; j++)
                 {
-                    Vector2 pos = newChunks[i].GetCoordinates();
-                    GameObject go = Instantiate(SpawnObject(newChunks[i].getAllTypes()[j]), 
+                    Vector2 pos = newChunksBuildings[i].GetCoordinates();
+                    GameObject go = Instantiate(SpawnObject(newChunksBuildings[i].getAllTypes()[j]),
                         new Vector3(pos.x * 8, j * 8 - 8, pos.y * 8),
-                        newChunks[i].GetAllRotations()[j]);
+                        newChunksBuildings[i].GetAllRotations()[j]);
                     go.isStatic = true;
-                    newChunks[i].AddTileToChunk(go, j);
+                    newChunksBuildings[i].AddTileToChunk(go, j);
 
                 }
 
-                for (int j = 0; j < newChunks[i].GetTypesOfProp().Count; j++)
+                //Generate props
+                if (!seenChunksProps.Contains(newChunksBuildings[i]))
                 {
-                    Vector2 pos = newChunks[i].GetPositionsOfProps()[j];
-                    GameObject go = Instantiate(SpawnTree(newChunks[i].GetTypesOfProp()[j]),
-                        new Vector3(pos.x * 8, 0, pos.y * 8), 
-                        Quaternion.identity);
-                    go.isStatic = true;
-                    newChunks[i].AddPropObject(go);
+                    for (int j = 0; j < newChunksBuildings[i].GetTypesOfProp().Count; j++)
+                    {
+                        Vector2 pos = newChunksBuildings[i].GetPositionsOfProps()[j];
+                        GameObject go = Instantiate(SpawnTree(newChunksBuildings[i].GetTypesOfProp()[j]),
+                            new Vector3(pos.x, 0, pos.y),
+                            Quaternion.identity);
+                        go.isStatic = true;
+                        newChunksBuildings[i].AddPropObject(go);
+                    }
                 }
 
 
@@ -299,7 +321,9 @@ public class WorldGenerator : MonoBehaviour
 
         }
 
-        seenChunks = newChunks;
+
+        seenChunksBuildings = newChunksBuildings;
+        seenChunksProps = newChunksProps;
 
     }    
 
@@ -348,6 +372,10 @@ public class WorldGenerator : MonoBehaviour
                 return sTreePrefabs[2];
             case 3:
                 return sTreePrefabs[3];
+            case 4:
+                return sTreePrefabs[4];
+            case 5:
+                return sTreePrefabs[5];
             default:
                 return sTreePrefabs[0];
         }

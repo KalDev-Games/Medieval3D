@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 33000012079986258}
   - component: {fileID: 23000013933252682}
   - component: {fileID: 64000012162240616}
+  - component: {fileID: -7726724898278041217}
   m_Layer: 0
   m_Name: Carrot_Plant
   m_TagString: Untagged
@@ -96,3 +97,19 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300024, guid: b69b26c8b73b8bd49bf243bbe541a2e0, type: 3}
+--- !u!114 &-7726724898278041217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000013410243764}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c58afc5d8f074344a2f96c42e8f36fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 0
+  regenerationBonus: 2
+  healthBonus: 2
+  saturationBonus: 2

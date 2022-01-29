@@ -70,14 +70,12 @@ public class Player : MonoBehaviour
         RaycastHit hit;
         Ray ray = new Ray(Camera.main.transform.position, Camera.main.transform.rotation * Vector3.forward * rangeForRay);
         Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.rotation * Vector3.forward * rangeForRay, Color.black);
-        Debug.Log("Ray");
      
         //Debug.DrawRay(ray,Color.red);
 
         if (Physics.Raycast(ray, out hit))
         {
             
-            Debug.Log(hit.transform.name);
 
             if (hit.transform.GetComponent<Food>())
             {
