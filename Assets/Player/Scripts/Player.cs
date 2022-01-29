@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -34,6 +35,14 @@ public class Player : MonoBehaviour
     private Food food;
     private GameObject obj;
 
+    [Header("GUI")]
+    [SerializeField]
+    private Slider sliderHealth;
+    [SerializeField]
+    private Slider sliderHunger;
+    [SerializeField]
+    private Slider sliderEndurance;
+
     private void Awake()
     {
         controls = new NonMovementControls();
@@ -56,7 +65,7 @@ public class Player : MonoBehaviour
 
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         hunger -= starvationRate * Time.deltaTime;
 
@@ -95,6 +104,14 @@ public class Player : MonoBehaviour
         }
 
     }
+
+    private void LateUpdate()
+    {
+        sliderHealth.value = health;
+        sliderEndurance.value = endurance;
+        sliderHunger.value = hunger;
+    }
+
 
     private void Eat(InputAction.CallbackContext ctx)
     {
