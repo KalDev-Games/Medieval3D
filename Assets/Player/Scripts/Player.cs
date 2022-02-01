@@ -30,6 +30,9 @@ public class Player : MonoBehaviour
     public AnimationCurve Regeneration { get => regeneration; }
     public float Hunger { get => hunger;}
     public static int LastUI { get => lastUI; set => lastUI = value; }
+    public int Stone { get => stone; set => stone = value; }
+    public int Wood { get => wood; set => wood = value; }
+    public int Gold { get => gold; set => gold = value; }
 
     private NonMovementControls controls;
 
@@ -46,6 +49,8 @@ public class Player : MonoBehaviour
     private int stone;
     [SerializeField]
     private int wood;
+    [SerializeField]
+    private int gold;
 
     [Header("GUI")]
     [SerializeField]
@@ -67,12 +72,16 @@ public class Player : MonoBehaviour
     private List<GameObject> otherUI;
     [SerializeField]
     private GameObject pauseUI;
+    
+    [Header("NPC")]
+    [SerializeField]
+    private NPC npc;
 
     private void Awake()
     {
         controls = new NonMovementControls();
         controls.NotMovementActions.Eat.performed += Eat;
-        controls.WorldInteraction.GetRessource.performed += ClaimRessource;
+        controls.WorldInteraction.GetRessource.performed += Interact;
 
         controls.Misc.PauseGame.performed += PauseGame;
 
@@ -126,10 +135,15 @@ public class Player : MonoBehaviour
                 material = hit.transform.GetComponent<Materials>();
                 obj = hit.transform.gameObject;
             }
+            else if (hit.transform.GetComponent<NPC>())
+            {
+                npc = hit.transform.GetComponent<NPC>();
+            }
             else
             {
                 food = null;
                 material = null;
+                npc = null;
                 obj = null;
             }
             
@@ -193,9 +207,9 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void ClaimRessource(InputAction.CallbackContext ctx)
+    private void Interact(InputAction.CallbackContext ctx)
     {
-        
+        #region ressources
         if (material != null && material.HitsTaken < material.HitsNecessary)
         {
             material.HitsTaken++;
@@ -216,6 +230,12 @@ public class Player : MonoBehaviour
 
             Destroy(obj);
             material = null;
+        }
+        #endregion
+
+        if (npc != null)
+        {
+            npc.Trade(this);
         }
     }
 }
