@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -28,6 +29,7 @@ public class Player : MonoBehaviour
     public float EnduranceMinus { get => enduranceMinus;}
     public AnimationCurve Regeneration { get => regeneration; }
     public float Hunger { get => hunger;}
+    public static int LastUI { get => lastUI; set => lastUI = value; }
 
     private NonMovementControls controls;
 
@@ -59,11 +61,20 @@ public class Player : MonoBehaviour
     [SerializeField]
     private Vector2 currentChunk;
 
+    [Header("UI")]
+    private static int lastUI;
+    [SerializeField]
+    private List<GameObject> otherUI;
+    [SerializeField]
+    private GameObject pauseUI;
+
     private void Awake()
     {
         controls = new NonMovementControls();
         controls.NotMovementActions.Eat.performed += Eat;
         controls.WorldInteraction.GetRessource.performed += ClaimRessource;
+
+        controls.Misc.PauseGame.performed += PauseGame;
 
     }
 
@@ -71,6 +82,7 @@ public class Player : MonoBehaviour
     {
         controls.NotMovementActions.Eat.Enable();
         controls.WorldInteraction.GetRessource.Enable();
+        controls.Misc.PauseGame.Enable();
     }
 
     void Start()
@@ -138,6 +150,35 @@ public class Player : MonoBehaviour
         currentChunk = new Vector2(transform.position.x / 8, transform.position.z/ 8);
     }
 
+
+    private void PauseGame(InputAction.CallbackContext ctx)
+    {
+        Time.timeScale = 0;
+        foreach (var item in otherUI)
+        {
+            item.SetActive(false);
+        }
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.lockState = CursorLockMode.None;
+        pauseUI.SetActive(true);
+    }
+
+    public void EndGame()
+    {
+        Application.Quit();
+    }
+
+    public void ResumeGame()
+    {
+        Cursor.lockState= CursorLockMode.Locked;
+        Time.timeScale = 1;
+        pauseUI.SetActive(false);
+        foreach (var item in otherUI)
+        {
+            item.SetActive(false);
+        }
+        otherUI[lastUI].SetActive(true);
+    }
 
     private void Eat(InputAction.CallbackContext ctx)
     {

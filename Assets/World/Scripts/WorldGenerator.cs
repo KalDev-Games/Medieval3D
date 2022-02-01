@@ -9,9 +9,9 @@ public class WorldGenerator : MonoBehaviour
     //Change this for changing tree occurences
     [Header("Trees and Ressources")]
     [SerializeField]
-    private const int maxTrees = 10;
+    private const int maxTrees = 30;
     [SerializeField]
-    private const int minTrees = 3;
+    private const int minTrees = 10;
     [SerializeField]
     private const int treeOrNatureElement = 90; //The higher the more and trees and less rocks
 
@@ -96,6 +96,7 @@ public class WorldGenerator : MonoBehaviour
         //CalculateCastlePositions();
         isLoading = false;
         panelGameUI.SetActive(true);
+        Player.LastUI = 1;
         panelLoadingScreen.SetActive(false);
     }
 
@@ -628,8 +629,14 @@ public class WorldGenerator : MonoBehaviour
                 return sPropPrefabs[5];
             case 6:
                 return sPropPrefabs[6];
+            case 7:
+                return sPropPrefabs[7];
+            case 8:
+                return sPropPrefabs[8];
+            case 9:
+                return sPropPrefabs[9];
 
-                //Nature Elements
+            //Nature Elements
             case 1001:
                 return sNatureElementsPrefabs[0];
             case 1002:
