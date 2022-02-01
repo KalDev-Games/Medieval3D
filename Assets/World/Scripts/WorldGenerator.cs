@@ -2,9 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class WorldGenerator : MonoBehaviour
 {
+    //Change this for changing tree occurences
+    [Header("Trees and Ressources")]
+    [SerializeField]
+    private const int maxTrees = 10;
+    [SerializeField]
+    private const int minTrees = 3;
+    [SerializeField]
+    private const int treeOrNatureElement = 90; //The higher the more and trees and less rocks
+
     // Start is called before the first frame update
     [SerializeField]
     private Transform player;
@@ -12,8 +22,11 @@ public class WorldGenerator : MonoBehaviour
     private List<GameObject> worldTiles;
     public static List<GameObject> sWorldTiles;
     [SerializeField]
-    private List<GameObject> treePrefabs;
-    private static List<GameObject> sTreePrefabs;
+    private List<GameObject> propPrefabs;
+    private static List<GameObject> sPropPrefabs;
+    [SerializeField]
+    private List<GameObject> natureElementsPrefabs;
+    private static List<GameObject> sNatureElementsPrefabs;
     [SerializeField]
     private static int worldSize = 256;
     public static int worldHeight = 8;
@@ -54,6 +67,19 @@ public class WorldGenerator : MonoBehaviour
     [SerializeField]
     private List<Chunk> newChunksProps;
 
+    [Header("Loading Screen")]
+    [SerializeField]
+    private GameObject panelLoadingScreen;
+    [SerializeField]
+    private UnityEngine.UI.Slider progressBar;
+    [SerializeField]
+    private Text whatAmIDoing;
+    [SerializeField]
+    private GameObject panelGameUI;
+    [SerializeField]
+    private GameObject loadingCircle;
+    private bool isLoading;
+
     public static int GetWorldSizeMedian()
     {
         return worldSize / 2;
@@ -61,14 +87,47 @@ public class WorldGenerator : MonoBehaviour
 
     void Start()
     {
+        isLoading = true;
+        progressBar.value = 0;
+        whatAmIDoing.text = "Generating World";
+        StartCoroutine(RunGeneratingWorld());
+        whatAmIDoing.text = "Generating castles";
+        StartCoroutine(RunGeneration());
+        //CalculateCastlePositions();
+        isLoading = false;
+        panelGameUI.SetActive(true);
+        panelLoadingScreen.SetActive(false);
+    }
 
+
+    public Thread StartTheThread(int param1, int param2)
+    {
+        var t = new Thread(() => UpdateChunks(param1, param2));
+        t.Start();
+        return t;
+    }
+
+    private IEnumerator RotateLoadingCircle()
+    {
+        float rotatingSpeed = 10;
+        while (isLoading)
+        {
+            loadingCircle.transform.Rotate(new Vector3(rotatingSpeed * Time.deltaTime,0,0));
+        }
+        yield return null;
+    }
+
+
+    private IEnumerator RunGeneratingWorld()
+    {
         rarityOfCastle = worldSize / rarityOfCastle;
 
-        sTreePrefabs = treePrefabs;
+        sPropPrefabs = propPrefabs;
         sWorldTiles = worldTiles;
+        sNatureElementsPrefabs = natureElementsPrefabs;
 
         int median = worldSize / 2;
-       
+
         model = new Chunk[worldSize, worldSize];
 
         for (int x = 0; x < worldSize; x++)
@@ -77,7 +136,7 @@ public class WorldGenerator : MonoBehaviour
             {
                 model[x, y] = new Chunk();
                 model[x, y].SetCoordinates(x, y);
-            }  
+            }
         }
 
 
@@ -85,30 +144,47 @@ public class WorldGenerator : MonoBehaviour
         for (int x = -median; x < median; x++)
         {
             for (int y = -median; y < median; y++)
-            { 
+            {
                 model[x + median, y + median].SetCoordinates(x, y);
                 for (int z = 0; z < worldHeight; z++)
                 {
-                   
+
                     if (z > 0)
                     {
                         int random = Random.Range(0, 50);
-                        int randomTrees = Random.Range(0, sTreePrefabs.Count);
-                        int randomAmount = Random.Range(3, 4);
+                        int randomTrees = Random.Range(0, sPropPrefabs.Count);
+                        int randomAmount = Random.Range(minTrees, maxTrees);
                         int shouldThereBeTrees = Random.Range(0, 20);
                         int randomRot = Random.Range(0, 4);
 
+                        int decideBetweenNatureAndRessource = Random.Range(0, 100) + 1;
 
-                        for (int i = 0; i < randomAmount; i++)
+
+                        if (decideBetweenNatureAndRessource <= treeOrNatureElement)
+                        {
+                            for (int i = 0; i < randomAmount; i++)
+                            {
+                                int xPos = Random.Range(-4, 4);
+
+                                int yPos = Random.Range(-4, 4);
+
+                                model[x + median, y + median].SetUpNewProp(randomTrees, new Vector2(xPos + x * offsetXZ, yPos + y * offsetXZ), 0);
+                            }
+                            model[x + median, y + median].SetTypeOfObject(z, 0);
+                            break;
+                        }
+                        else
                         {
                             int xPos = Random.Range(-4, 4);
 
                             int yPos = Random.Range(-4, 4);
 
-                            model[x + median, y + median].SetUpNewProp(randomTrees, new Vector2(xPos + x * offsetXZ, yPos + y * offsetXZ), 0);
+                            model[x + median, y + median].SetUpNewProp(randomTrees + 1000, new Vector2(xPos + x * offsetXZ, yPos + y * offsetXZ), 0);
+                            model[x + median, y + median].SetTypeOfObject(z, 0);
+                            break;
                         }
-                        model[x + median, y + median].SetTypeOfObject(z, 0);
-                        break;
+
+                        
 
                         /*
                         if ((random == 0 || random >= 7) && z == 0 && randomTrees <= 3)
@@ -147,18 +223,8 @@ public class WorldGenerator : MonoBehaviour
         }
 
         UpdateChunks(0, 0);
-        StartCoroutine(RunGeneration());
-        //CalculateCastlePositions();
+        yield return null;
     }
-
-
-    public Thread StartTheThread(int param1, int param2)
-    {
-        var t = new Thread(() => UpdateChunks(param1, param2));
-        t.Start();
-        return t;
-    }
-
   
 
 
@@ -517,10 +583,10 @@ public class WorldGenerator : MonoBehaviour
         switch (type)
         {
             case 0:
-                tile = sWorldTiles[0];
+                tile = sWorldTiles[0]; //Air
                 break;
             case 1:
-                tile = sWorldTiles[1];
+                tile = sWorldTiles[1]; //Dirt
                 break;
             case 2:
                 tile = sWorldTiles[2];
@@ -538,7 +604,7 @@ public class WorldGenerator : MonoBehaviour
                 tile = sWorldTiles[6];
                 break;
             default:
-                return sWorldTiles[0];
+                return sWorldTiles[1];
         }
         return tile;
     }
@@ -549,20 +615,46 @@ public class WorldGenerator : MonoBehaviour
         switch (id)
         {
             case 0:
-                return sTreePrefabs[0];
+                return sPropPrefabs[0];
             case 1:
-                return sTreePrefabs[1];
+                return sPropPrefabs[1];
             case 2:
-                return sTreePrefabs[2];
+                return sPropPrefabs[2];
             case 3:
-                return sTreePrefabs[3];
+                return sPropPrefabs[3];
             case 4:
-                return sTreePrefabs[4];
+                return sPropPrefabs[4];
             case 5:
-                return sTreePrefabs[5];
+                return sPropPrefabs[5];
+            case 6:
+                return sPropPrefabs[6];
+
+                //Nature Elements
+            case 1001:
+                return sNatureElementsPrefabs[0];
+            case 1002:
+                return sNatureElementsPrefabs[1];
+            case 1003:
+                return sNatureElementsPrefabs[2];
+            case 1004:
+                return sNatureElementsPrefabs[3];
+            case 1005:
+                return sNatureElementsPrefabs[4];
+            case 1006:
+                return sNatureElementsPrefabs[5];
+            case 1007:
+                return sNatureElementsPrefabs[6];
+            case 1008:
+                return sNatureElementsPrefabs[7];
+            case 1009:
+                return sNatureElementsPrefabs[8];
+            case 1010:
+                return sNatureElementsPrefabs[9];
             default:
-                return sTreePrefabs[0];
+                return sPropPrefabs[0];
         }
     }
+
+
     
 }

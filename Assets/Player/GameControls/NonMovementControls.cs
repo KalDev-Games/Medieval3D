@@ -169,6 +169,34 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Misc"",
+            ""id"": ""857e4904-1329-4827-971e-1679802159c3"",
+            ""actions"": [
+                {
+                    ""name"": ""PauseGame"",
+                    ""type"": ""Button"",
+                    ""id"": ""2450acc3-6caa-47fd-8508-4a41a7c7d903"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""67a5467a-4f76-45a4-a3c2-5f4c6e88559e"",
+                    ""path"": ""<Keyboard>/p"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PauseGame"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -183,6 +211,9 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
         // WorldInteraction
         m_WorldInteraction = asset.FindActionMap("WorldInteraction", throwIfNotFound: true);
         m_WorldInteraction_GetRessource = m_WorldInteraction.FindAction("GetRessource", throwIfNotFound: true);
+        // Misc
+        m_Misc = asset.FindActionMap("Misc", throwIfNotFound: true);
+        m_Misc_PauseGame = m_Misc.FindAction("PauseGame", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -336,6 +367,39 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
         }
     }
     public WorldInteractionActions @WorldInteraction => new WorldInteractionActions(this);
+
+    // Misc
+    private readonly InputActionMap m_Misc;
+    private IMiscActions m_MiscActionsCallbackInterface;
+    private readonly InputAction m_Misc_PauseGame;
+    public struct MiscActions
+    {
+        private @NonMovementControls m_Wrapper;
+        public MiscActions(@NonMovementControls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @PauseGame => m_Wrapper.m_Misc_PauseGame;
+        public InputActionMap Get() { return m_Wrapper.m_Misc; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(MiscActions set) { return set.Get(); }
+        public void SetCallbacks(IMiscActions instance)
+        {
+            if (m_Wrapper.m_MiscActionsCallbackInterface != null)
+            {
+                @PauseGame.started -= m_Wrapper.m_MiscActionsCallbackInterface.OnPauseGame;
+                @PauseGame.performed -= m_Wrapper.m_MiscActionsCallbackInterface.OnPauseGame;
+                @PauseGame.canceled -= m_Wrapper.m_MiscActionsCallbackInterface.OnPauseGame;
+            }
+            m_Wrapper.m_MiscActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @PauseGame.started += instance.OnPauseGame;
+                @PauseGame.performed += instance.OnPauseGame;
+                @PauseGame.canceled += instance.OnPauseGame;
+            }
+        }
+    }
+    public MiscActions @Misc => new MiscActions(this);
     public interface INotMovementActionsActions
     {
         void OnEnableBuildingMode(InputAction.CallbackContext context);
@@ -347,5 +411,9 @@ public partial class @NonMovementControls : IInputActionCollection2, IDisposable
     public interface IWorldInteractionActions
     {
         void OnGetRessource(InputAction.CallbackContext context);
+    }
+    public interface IMiscActions
+    {
+        void OnPauseGame(InputAction.CallbackContext context);
     }
 }
