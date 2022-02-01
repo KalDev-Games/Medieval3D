@@ -36,12 +36,9 @@ public class WorldGenerator : MonoBehaviour
     private static int lastX = 0;
     private static int lastY = 0;
 
-    private enum MyEnum
-    {
-        offline,
-        sd
-    }
-    
+    //Castle System
+    private int maxSizeOfCastle = 3; // a castle has the size of this (value * 2 + 1)^2
+    private int rarityOfCastle = 16; //the higher this value, the less castles spawn
 
     [Header("Debugging")]
     [SerializeField]
@@ -64,7 +61,9 @@ public class WorldGenerator : MonoBehaviour
 
     void Start()
     {
-        
+
+        rarityOfCastle = worldSize / rarityOfCastle;
+
         sTreePrefabs = treePrefabs;
         sWorldTiles = worldTiles;
 
@@ -99,8 +98,19 @@ public class WorldGenerator : MonoBehaviour
                         int shouldThereBeTrees = Random.Range(0, 20);
                         int randomRot = Random.Range(0, 4);
 
-                        
 
+                        for (int i = 0; i < randomAmount; i++)
+                        {
+                            int xPos = Random.Range(-4, 4);
+
+                            int yPos = Random.Range(-4, 4);
+
+                            model[x + median, y + median].SetUpNewProp(randomTrees, new Vector2(xPos + x * offsetXZ, yPos + y * offsetXZ), 0);
+                        }
+                        model[x + median, y + median].SetTypeOfObject(z, 0);
+                        break;
+
+                        /*
                         if ((random == 0 || random >= 7) && z == 0 && randomTrees <= 3)
                         {
                             model[x + median, y + median].SetTypeOfObject(z,0);
@@ -109,7 +119,7 @@ public class WorldGenerator : MonoBehaviour
                         else if (random == 0 && z == 0)
                         {
                             
-                            model[x + median, y + median].SetTypeOfObject(z, 0);
+                            
                         }
                         else if (random > 1 && random < 7 && z == 1)
                         {
@@ -121,17 +131,10 @@ public class WorldGenerator : MonoBehaviour
                         }
                         else if(z== 1)
                         {
-                            for (int i = 0; i < randomAmount; i++)
-                            {
-                                int xPos = Random.Range(-4, 4);
-                                
-                                int yPos = Random.Range(-4, 4);
-                                
-                                model[x + median, y + median].SetUpNewProp(randomTrees, new Vector2(xPos + x * offsetXZ, yPos + y * offsetXZ), 0);
-                            }
+                            
                         }
                         
-
+                        */
 
                     }
                     else
@@ -144,6 +147,8 @@ public class WorldGenerator : MonoBehaviour
         }
 
         UpdateChunks(0, 0);
+        StartCoroutine(RunGeneration());
+        //CalculateCastlePositions();
     }
 
 
@@ -228,6 +233,185 @@ public class WorldGenerator : MonoBehaviour
         UpdateChunks (x,y);
         yield return null;
     }
+
+    IEnumerator RunGeneration()
+    {
+        CalculateCastlePositions();
+        yield return null;
+    }
+
+    #region Castle
+    private void GenerateCastle(Chunk[,]chunksForCastle)
+    {
+        
+        List<Chunk>[] chunkRings = new List<Chunk>[maxSizeOfCastle + 1];
+        List<Chunk> chunkList = new List<Chunk>();
+
+
+        //Calculate center of castle
+        //int center = (maxSizeOfCastle - 1) / 2;
+        //Chunk centerChunk = chunksForCastle[center,center];
+        //Vector2 positionOfCenterChunk = centerChunk.GetPosOfChunk();
+
+        /*
+        for (int i = 0; i < maxSizeOfCastle + 1; i++)
+        {
+            chunkRings[i] = new List<Chunk>();
+        }
+
+        chunkList.Add(centerChunk);
+        chunkRings[0] = chunkList;
+        */
+
+
+        for (int x = 0; x < chunksForCastle.GetLength(0); x++)
+        {
+            for (int y = 0; y < chunksForCastle.GetLength(0); y++)
+            {
+                int height = Random.Range(0, worldHeight);
+
+                for (int i = 0; i < height; i++)
+                {
+
+                    int randomTile = Random.Range(2, sWorldTiles.Count);
+                    int randomRot = Random.Range(0, 4);
+
+                    chunksForCastle[x,y].SetTypeOfObject(i, randomTile);
+                    Quaternion rot = Quaternion.AngleAxis(randomRot * 90, Vector3.up);
+                    chunksForCastle[x, y].SetRotationOfLayer(rot, i);
+
+
+                }
+            }
+        }
+
+
+
+
+        /*
+        //Calculate rings for castle
+        for (int i = 1; i < maxSizeOfCastle; i++)
+        {
+
+            for (int x = 0; x < chunksForCastle.GetLength(0); x++)
+            {
+                
+                for (int y = 0; y < chunksForCastle.GetLength(1); y++)
+                {
+
+                    try
+                    {
+                        Vector2 pos = chunksForCastle[x, y].GetPosOfChunk();
+
+                        float distance = Vector2.Distance(positionOfCenterChunk, pos);
+
+                        if (distance <= Mathf.Sqrt((i + i) * i))
+                        {
+                            for (int j = 0; j < chunkRings.Length; j++)
+                            {
+
+                                if (chunkRings[j].Contains(chunksForCastle[x, y]))
+                                {
+                                    break;
+                                }
+                                chunkRings[i].Add(chunksForCastle[x, y]);
+                            }
+
+                        }
+                    }
+                    catch (System.Exception)
+                    {
+
+                        throw;
+                    }
+                    
+                }
+            }
+            
+        }
+
+        //Generate castle
+
+        for (int i = 0; i < chunkRings.Length; i++) //for every castle ring
+        {
+            for (int j = 0; j < chunkRings[i].Count; j++) //for every chunk in this castle ring
+            {
+                int probabilityForTile = Random.Range(0, 100) + 1;
+                int rate = 10;
+                int maxValueForSpawning = rate * i;
+
+                List<Chunk> chunkForSpawning = chunkRings[i];
+
+                if (maxValueForSpawning < probabilityForTile)
+                {
+
+                    for (int height = 1; height < chunkForSpawning[j].getAllTypes().Length; height++)
+                    {
+                        int probabilityForTileHeight = Random.Range(0, 100) + 1;
+                        int rateHeight = 20;
+                        int maxValueForSpawningHeight = (rateHeight + i * 2) * height;
+
+                        if (maxValueForSpawningHeight < probabilityForTileHeight)
+                        {
+                            int randomTile = Random.Range(2, sWorldTiles.Count);
+                            int randomRot = Random.Range(0, 4);
+
+                            chunkForSpawning[j].SetTypeOfObject(height, randomTile);
+                            Quaternion rot = Quaternion.AngleAxis(randomRot * 90, Vector3.up);
+                            chunkForSpawning[j].SetRotationOfLayer(rot, height);
+                        }
+
+                    }
+
+                }
+            }
+
+        }
+        */
+
+    }
+
+    private void CalculateCastlePositions()
+    {
+        for (int i = 0; i < rarityOfCastle; i++)
+        {
+            int xPos = Random.Range(0, worldSize);
+            int yPos = Random.Range(0, worldSize);
+
+            //Debug.LogWarning(xPos + " " + yPos);
+
+            Chunk[,] castleArea = new Chunk[maxSizeOfCastle * 2 + 1, maxSizeOfCastle * 2 + 1];
+            for (int x = -maxSizeOfCastle; x <= maxSizeOfCastle; x++)
+            {
+                for (int y = -maxSizeOfCastle; y <= maxSizeOfCastle; y++)
+                {
+                    var xVal = x + maxSizeOfCastle;
+                    var yVal = y + maxSizeOfCastle;
+                    //Debug.Log(xVal + " " + yVal + "\n" + castleArea.GetLength(0));
+
+                    try
+                    {
+                        castleArea[x + maxSizeOfCastle, y + maxSizeOfCastle] = model[xPos + x, yPos + y];
+                        castleArea[x + maxSizeOfCastle, y + maxSizeOfCastle].GetTypesOfProp().Clear();
+                        castleArea[x + maxSizeOfCastle, y + maxSizeOfCastle].GetPositionsOfProps().Clear();
+                        castleArea[x + maxSizeOfCastle, y + maxSizeOfCastle].GetRotationOfProps().Clear();
+                        castleArea[x + maxSizeOfCastle, y + maxSizeOfCastle].PropObjects.Clear();
+                    }
+                    catch (System.Exception)
+                    {
+                        
+                       
+                    }
+
+                    
+                }
+            }
+            Debug.LogWarning(castleArea[0, 0].GetCoordinates());
+            GenerateCastle(castleArea);
+        }
+    }
+
+    #endregion
 
     private void UpdateChunks(int playerX, int playerY)
     {

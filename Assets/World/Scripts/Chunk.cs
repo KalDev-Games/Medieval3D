@@ -16,6 +16,8 @@ public class Chunk
     private List<float> propRotZ = new List<float>();
     private List<GameObject> propObjects = new List<GameObject>();
 
+    public List<GameObject> PropObjects { get => propObjects; set => propObjects = value; }
+
     public Chunk()
     {
         chunkObjects = new GameObject[WorldGenerator.worldHeight];
@@ -78,12 +80,12 @@ public class Chunk
 
     public List<GameObject> GetAllPropObjects()
     {
-        return propObjects;
+        return PropObjects;
     }
 
     public void AddPropObject(GameObject gameObject)
     {
-        propObjects.Add(gameObject);
+        PropObjects.Add(gameObject);
     }
 
 
@@ -95,5 +97,10 @@ public class Chunk
     public List<Vector2> GetPositionsOfProps()
     {
         return propPos;
+    }
+
+    public List<float> GetRotationOfProps()
+    {
+        return propRotZ;
     }
 }

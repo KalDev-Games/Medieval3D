@@ -53,6 +53,12 @@ public class Player : MonoBehaviour
     [SerializeField]
     private Slider sliderEndurance;
 
+    [Header("Position")]
+    [SerializeField]
+    private Vector2 currentPosition;
+    [SerializeField]
+    private Vector2 currentChunk;
+
     private void Awake()
     {
         controls = new NonMovementControls();
@@ -127,6 +133,9 @@ public class Player : MonoBehaviour
         sliderHealth.value = health;
         sliderEndurance.value = endurance;
         sliderHunger.value = hunger;
+
+        currentPosition = new Vector2(transform.position.x, transform.position.z);
+        currentChunk = new Vector2(transform.position.x / 8, transform.position.z/ 8);
     }
 
 
