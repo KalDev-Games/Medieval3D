@@ -9,13 +9,14 @@ public class WorldGenerator : MonoBehaviour
     //Change this for changing tree occurences
     [Header("Trees and Ressources")]
     [SerializeField]
-    private const int maxTrees = 30;
+    private int maxTrees = 30;
     [SerializeField]
-    private const int minTrees = 10;
+    private int minTrees = 10;
     [SerializeField]
-    private const int treeOrNatureElement = 90; //The higher the more and trees and less rocks
+    private int treeOrNatureElement = 90; //The higher the more and trees and less rocks
 
     // Start is called before the first frame update
+    [Header ("Player & World")]
     [SerializeField]
     private Transform player;
     [SerializeField]
@@ -156,7 +157,7 @@ public class WorldGenerator : MonoBehaviour
                         int randomTrees = Random.Range(0, sPropPrefabs.Count);
                         int randomAmount = Random.Range(minTrees, maxTrees);
                         int shouldThereBeTrees = Random.Range(0, 20);
-                        int randomRot = Random.Range(0, 4);
+                        int randomRot = Random.Range(0, 360);
 
                         int decideBetweenNatureAndRessource = Random.Range(0, 100) + 1;
 
@@ -169,7 +170,7 @@ public class WorldGenerator : MonoBehaviour
 
                                 int yPos = Random.Range(-4, 4);
 
-                                model[x + median, y + median].SetUpNewProp(randomTrees, new Vector2(xPos + x * offsetXZ, yPos + y * offsetXZ), 0);
+                                model[x + median, y + median].SetUpNewProp(randomTrees, new Vector2(xPos + x * offsetXZ, yPos + y * offsetXZ), randomRot);
                             }
                             model[x + median, y + median].SetTypeOfObject(z, 0);
                             break;
@@ -180,7 +181,7 @@ public class WorldGenerator : MonoBehaviour
 
                             int yPos = Random.Range(-4, 4);
 
-                            model[x + median, y + median].SetUpNewProp(randomTrees + 1000, new Vector2(xPos + x * offsetXZ, yPos + y * offsetXZ), 0);
+                            model[x + median, y + median].SetUpNewProp(randomTrees + 1000, new Vector2(xPos + x * offsetXZ, yPos + y * offsetXZ), randomRot);
                             model[x + median, y + median].SetTypeOfObject(z, 0);
                             break;
                         }
