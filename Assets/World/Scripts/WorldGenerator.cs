@@ -225,6 +225,7 @@ public class WorldGenerator : MonoBehaviour
         }
 
         UpdateChunks(0, 0);
+        progressBar.value = 50;
         yield return null;
     }
   
@@ -436,6 +437,7 @@ public class WorldGenerator : MonoBehaviour
 
         }
         */
+        progressBar.value = 100;
 
     }
 

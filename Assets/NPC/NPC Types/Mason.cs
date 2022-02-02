@@ -17,6 +17,7 @@ public class Mason : NPC
         {
             player.Stone -= 10;
             player.Gold += 7;
+            Debug.Log("Thanks!");
         }
     }
 }

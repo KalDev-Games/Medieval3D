@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Player : MonoBehaviour
@@ -179,7 +180,7 @@ public class Player : MonoBehaviour
 
     public void EndGame()
     {
-        Application.Quit();
+        SceneManager.LoadScene(0);
     }
 
     public void ResumeGame()
