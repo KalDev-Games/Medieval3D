@@ -23,6 +23,9 @@ public class WorldGenerator : MonoBehaviour
     private List<GameObject> worldTiles;
     public static List<GameObject> sWorldTiles;
     [SerializeField]
+    private List<GameObject> worldTilesWater;
+    public static List<GameObject> sWorldTilesWater;
+    [SerializeField]
     private List<GameObject> propPrefabs;
     private static List<GameObject> sPropPrefabs;
     [SerializeField]
@@ -51,8 +54,17 @@ public class WorldGenerator : MonoBehaviour
     private static int lastY = 0;
 
     //Castle System
+    [Header("Castle")]
+    [SerializeField]
     private int maxSizeOfCastle = 3; // a castle has the size of this (value * 2 + 1)^2
+    [SerializeField]
     private int rarityOfCastle = 16; //the higher this value, the less castles spawn
+
+    [Header("Water")]
+    [SerializeField]
+    private int maxSizeOfLake = 3; // a castle has the size of this (value * 2 + 1)^2
+    [SerializeField]
+    private int rarityOfLake = 16; //the higher this value, the less castles spawn
 
     [Header("Debugging")]
     [SerializeField]
@@ -72,7 +84,7 @@ public class WorldGenerator : MonoBehaviour
     [SerializeField]
     private GameObject panelLoadingScreen;
     [SerializeField]
-    private UnityEngine.UI.Slider progressBar;
+    private Slider progressBar;
     [SerializeField]
     private Text whatAmIDoing;
     [SerializeField]
@@ -92,6 +104,8 @@ public class WorldGenerator : MonoBehaviour
         progressBar.value = 0;
         whatAmIDoing.text = "Generating World";
         StartCoroutine(RunGeneratingWorld());
+        //StartCoroutine(RunLakeGeneration());
+        CreateSeas();
         whatAmIDoing.text = "Generating castles";
         StartCoroutine(RunGeneration());
         //CalculateCastlePositions();
@@ -127,6 +141,7 @@ public class WorldGenerator : MonoBehaviour
         sPropPrefabs = propPrefabs;
         sWorldTiles = worldTiles;
         sNatureElementsPrefabs = natureElementsPrefabs;
+        sWorldTilesWater = worldTilesWater;
 
         int median = worldSize / 2;
 
@@ -309,6 +324,13 @@ public class WorldGenerator : MonoBehaviour
         yield return null;
     }
 
+    IEnumerator RunLakeGeneration()
+    {
+        CreateSeas();
+        yield return null;
+    }
+
+
     #region Castle
     private void GenerateCastle(Chunk[,]chunksForCastle)
     {
@@ -339,7 +361,7 @@ public class WorldGenerator : MonoBehaviour
             {
                 int height = Random.Range(0, worldHeight);
 
-                for (int i = 0; i < height; i++)
+                for (int i = 1; i < height; i++)
                 {
 
                     int randomTile = Random.Range(2, sWorldTiles.Count);
@@ -458,30 +480,205 @@ public class WorldGenerator : MonoBehaviour
                     var xVal = x + maxSizeOfCastle;
                     var yVal = y + maxSizeOfCastle;
                     //Debug.Log(xVal + " " + yVal + "\n" + castleArea.GetLength(0));
-
-                    try
-                    {
-                        castleArea[x + maxSizeOfCastle, y + maxSizeOfCastle] = model[xPos + x, yPos + y];
-                        castleArea[x + maxSizeOfCastle, y + maxSizeOfCastle].GetTypesOfProp().Clear();
-                        castleArea[x + maxSizeOfCastle, y + maxSizeOfCastle].GetPositionsOfProps().Clear();
-                        castleArea[x + maxSizeOfCastle, y + maxSizeOfCastle].GetRotationOfProps().Clear();
-                        castleArea[x + maxSizeOfCastle, y + maxSizeOfCastle].PropObjects.Clear();
-                    }
-                    catch (System.Exception)
-                    {
-                        
-                       
-                    }
-
+                    ClearTileOfProps(castleArea[x + maxSizeOfCastle, y + maxSizeOfCastle]);
                     
                 }
             }
-            Debug.LogWarning(castleArea[0, 0].GetCoordinates());
+            //Debug.LogWarning(castleArea[0, 0].GetCoordinates());
             GenerateCastle(castleArea);
         }
     }
 
     #endregion
+
+
+
+    private void ClearTileOfProps(Chunk chunk)
+    {
+        try
+        {
+            chunk.GetTypesOfProp().Clear();
+            chunk.GetPositionsOfProps().Clear();
+            chunk.GetRotationOfProps().Clear();
+            chunk.PropObjects.Clear();
+        }
+        catch (System.Exception)
+        {
+
+
+        }
+    }
+    //p = stretch *(-apex)^2+100
+
+    private void CreateSeas()
+    {
+        int amountLakes = worldSize / rarityOfLake;
+        List<Chunk> seaParts = new List<Chunk>();
+
+        for (int i = 0; i < amountLakes; i++)
+        {
+            //random Coordinates
+            seaParts.Clear();
+            int xPos = Random.Range(0, worldSize - 50);
+            int yPos = Random.Range(0,worldSize - 50);
+
+            while (xPos + maxSizeOfLake > worldSize && yPos + maxSizeOfLake > worldSize)
+            {
+                xPos = Random.Range(0, worldSize);
+                yPos = Random.Range(0, worldSize);
+
+            }
+
+            int isThereWater = Random.Range(0, 20);
+            Debug.LogError("Go to " + model[xPos,yPos].GetPosOfChunk().x*8 + " and " 
+                + model[xPos, yPos].GetPosOfChunk().y * 8);
+
+            for (int x = 0; x < maxSizeOfLake; x++)
+            {
+                for (int y = 0; y < maxSizeOfLake; y++)
+                {
+                    isThereWater = Random.Range(0, 20);
+                    //Debug.LogWarning("Probability for " + y + " is " + probabilityForLake(maxSizeOfLake / 2, y) + "\n" + isThereWater);
+                    if (probabilityForLake(maxSizeOfLake/2,y) >= isThereWater && probabilityForLake(maxSizeOfLake / 2, x) >= isThereWater) 
+                    {
+                        try
+                        {
+                            //Debug.LogWarning(model[xPos + x, yPos + y].GetCoordinates() + "\n" + model[xPos + x, yPos + y].GetAllObjectsOfChunk()[0]);
+                            model[xPos + x, yPos + y].SetTypeOfObject(0,2000);
+                            ClearTileOfProps(model[xPos + x, yPos + y]);
+                            seaParts.Add(model[xPos + x, yPos + y]);
+                            //Debug.LogWarning(model[xPos + x, yPos + y].GetCoordinates() + "\n" + model[xPos + x, yPos + y].GetAllObjectsOfChunk()[0]);
+                        }
+                        catch (System.Exception)
+                        {
+                            var xPosition = xPos + x;
+                            var yPosition = yPos + y;
+                            Debug.LogWarning("Chunk not possible for " + xPosition + "|" + yPosition);
+                            throw;
+                        }
+                        
+                    }
+                }
+            }
+
+            foreach (var seaTile in seaParts)
+            {
+                Vector2 pos = seaTile.GetPosOfChunk();
+
+                bool[] directions = new bool[4];
+
+
+
+                int neighborCounter = 0;
+
+                foreach (var item in seaParts) 
+                {
+
+                    Vector2 comp = item.GetPosOfChunk();
+                    if (Vector2.Distance(pos, comp) == 1)
+                    {
+                        neighborCounter++;
+
+                        if (pos.x - comp.x == 0 && pos.y - comp.y == 1)
+                        {
+                            directions[0] = true;
+                        }
+                        else if (pos.x - comp.x == 0 && pos.y - comp.y == -1)
+                        {
+                            directions[2] = true;
+                        } 
+                        else if (pos.x - comp.x == 1 && pos.y - comp.y == 0)
+                        {
+                            directions[1] = true;
+                        }
+                        else if (pos.x - comp.x == -1 && pos.y - comp.y == 0)
+                        {
+                            directions[3] = true;
+                        }
+
+
+
+
+
+                    }
+                }
+                if (neighborCounter > 1 && neighborCounter < 4)
+                {
+                    if (neighborCounter == 2)
+                    {
+                        seaTile.SetTypeOfObject(0, 2001);
+
+                        if (directions[0] && directions [1])
+                        {
+                            seaTile.SetRotationOfLayer(Quaternion.AngleAxis(270, Vector3.up),0);
+                        }
+                        else if (directions[1] && directions[2])
+                        {
+                            seaTile.SetRotationOfLayer(Quaternion.AngleAxis(90, Vector3.up), 0);
+                        }
+                        else if (directions[2] && directions[3])
+                        {
+                            seaTile.SetRotationOfLayer(Quaternion.AngleAxis(0, Vector3.up), 0);
+                        } 
+                        else if (directions[3] && directions[0])
+                        {
+                            seaTile.SetRotationOfLayer(Quaternion.AngleAxis(180,Vector3.up), 0);
+                        }
+
+                    }
+                    else if (neighborCounter == 3)
+                    {
+                        seaTile.SetTypeOfObject(0, 2002);
+
+                        if (directions[0] && directions[1] && directions[2])
+                        {
+                            seaTile.SetRotationOfLayer(Quaternion.AngleAxis(270, Vector3.up), 0);
+                        } 
+                        else if (directions[1] && directions[2] && directions[3])
+                        {
+                            seaTile.SetRotationOfLayer(Quaternion.AngleAxis(180, Vector3.up), 0);
+                        }
+                        else if (directions[2] && directions[3] && directions[0])
+                        {
+                            seaTile.SetRotationOfLayer(Quaternion.AngleAxis(0, Vector3.up), 0);
+                        }
+                        else if (directions[3] && directions[0] && directions[1])
+                        {
+                            seaTile.SetRotationOfLayer(Quaternion.AngleAxis(90, Vector3.up), 0);
+                        }
+
+
+                    }
+
+                }
+                
+            }
+        }
+
+
+
+    }
+
+    private float probabilityForLake(int apex, int xValue)
+    {
+        int maxProbability = 20;
+        int startAlititude = 1;
+        float stretch = 1;
+        if (apex == xValue)
+        {
+            stretch = startAlititude - maxProbability;
+        }
+        else
+        {
+            stretch = startAlititude - maxProbability / Mathf.Pow(xValue - apex, 2);
+        }
+        
+        return stretch * Mathf.Pow(xValue - apex, 2) + maxProbability;
+    }
+
+
+
+
 
     private void UpdateChunks(int playerX, int playerY)
     {
@@ -606,6 +803,15 @@ public class WorldGenerator : MonoBehaviour
                 break;
             case 6:
                 tile = sWorldTiles[6];
+                break;
+            case 2000:
+                tile = sWorldTilesWater[0];
+                break;
+            case 2001:
+                tile = sWorldTilesWater[1];
+                break;
+            case 2002:
+                tile = sWorldTilesWater[2];
                 break;
             default:
                 return sWorldTiles[1];
