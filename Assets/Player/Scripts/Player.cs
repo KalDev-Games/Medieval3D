@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -31,9 +32,7 @@ public class Player : MonoBehaviour
     public AnimationCurve Regeneration { get => regeneration; }
     public float Hunger { get => hunger;}
     public static int LastUI { get => lastUI; set => lastUI = value; }
-    public int Stone { get => stone; set => stone = value; }
-    public int Wood { get => wood; set => wood = value; }
-    public int Gold { get => gold; set => gold = value; }
+    public List<Ressource> Inventory { get => inventory; set => inventory = value; }
 
     private NonMovementControls controls;
 
@@ -47,11 +46,7 @@ public class Player : MonoBehaviour
 
     [Header("Inventory")]
     [SerializeField]
-    private int stone;
-    [SerializeField]
-    private int wood;
-    [SerializeField]
-    private int gold;
+    private List<Ressource> inventory;
 
     [Header("GUI")]
     [SerializeField]
@@ -214,20 +209,16 @@ public class Player : MonoBehaviour
         if (material != null && material.HitsTaken < material.HitsNecessary)
         {
             material.HitsTaken++;
-            
+            Debug.Log("Hit");
 
         } else if (material != null && material.HitsTaken == material.HitsNecessary)
         {
-            
-            if (material.GetType().ToString().Equals("Wood"))
-            {
-                wood += material.AmountOfRessources;
-              
-            }
-            else if (material.GetType().ToString().Equals("Rock"))
-            {
-                stone += material.AmountOfRessources;
-            }
+            material.id = new IdInfo(0);
+
+            Ressource rsc = material.DeepCopy();
+
+            Debug.Log(rsc.GetType());
+            inventory.Add(rsc);
 
             Destroy(obj);
             material = null;
@@ -238,5 +229,22 @@ public class Player : MonoBehaviour
         {
             npc.Trade(this);
         }
+    }
+
+
+    public int HowManyRessources(Materials.ressourceType whatKind)
+    {
+        int counter = 0;
+        
+
+        for (int i = 0; i < inventory.Count; i++)
+        {
+            if (inventory[i].Equals(whatKind))
+            {
+                counter++;
+            }
+        }
+
+        return counter;
     }
 }

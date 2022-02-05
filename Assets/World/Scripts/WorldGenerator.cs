@@ -147,6 +147,8 @@ public class WorldGenerator : MonoBehaviour
 
         model = new Chunk[worldSize, worldSize];
 
+
+
         for (int x = 0; x < worldSize; x++)
         {
             for (int y = 0; y < worldSize; y++)

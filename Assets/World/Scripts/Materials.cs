@@ -4,11 +4,7 @@ using UnityEngine;
 
 public class Materials : Ressource
 {
-    protected enum ressourceType
-    {
-        wood,
-        rock,
-    }
+    
     protected int hitsTaken = 0;
     protected int hitsNecessary;
     protected int amountOfRessources;

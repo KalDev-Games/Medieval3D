@@ -9,6 +9,6 @@ public class NPC : MonoBehaviour
 
     public virtual void Trade(Player player)
     {
-
+        Debug.Log("");
     }
 }
