@@ -16,5 +16,6 @@ public class FrameCounter : MonoBehaviour
     {
         float current = (int)(1f / Time.unscaledDeltaTime);
         displayFrames.text = "FPS: "  + current.ToString();
+
     }
 }
