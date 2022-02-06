@@ -314,6 +314,11 @@ public class WorldGenerator : MonoBehaviour
             GameObject go = Instantiate(SpawnTree(chunk.GetTypesOfProp()[j]),
                 new Vector3(pos.x, 0, pos.y),
                 Quaternion.identity);
+            if (chunk.GetTypesOfProp()[j] < 1000)
+            {
+                go.AddComponent<Loot>();
+                go.GetComponent<Loot>().ressource = AddRessource(chunk.GetTypesOfProp()[j]);
+            }
             go.isStatic = true;
             chunk.AddPropObject(go);
         }
@@ -771,6 +776,11 @@ public class WorldGenerator : MonoBehaviour
                         GameObject go = Instantiate(SpawnTree(newChunksBuildings[i].GetTypesOfProp()[j]),
                             new Vector3(pos.x, 0, pos.y),
                             Quaternion.identity);
+                        if (newChunksBuildings[i].GetTypesOfProp()[j] < 1000)
+                        {
+                            go.AddComponent<Loot>();
+                            go.GetComponent<Loot>().ressource = AddRessource(newChunksBuildings[i].GetTypesOfProp()[j]);
+                        }
                         go.isStatic = true;
                         newChunksBuildings[i].AddPropObject(go);
                     }
@@ -890,6 +900,31 @@ public class WorldGenerator : MonoBehaviour
         }
                 
         return newGObj;
+    }
+
+    private static Ressource AddRessource(int index)
+    {
+        int index2 = index;
+        if (index >= 0 && index < 4)
+        {
+            return new Wood();
+        }
+        else if (index == 4)
+        {
+            return new Corn();
+        }
+        else if (index == 5)
+        {
+            return new Carot();
+        }
+        else if (index > 5 && index < 10)
+        {
+            return new Rock();
+        }
+        else
+        {
+            return new Rock();
+        }
     }
 
 

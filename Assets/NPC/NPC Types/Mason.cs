@@ -14,31 +14,35 @@ public class Mason : NPC
         Debug.Log("Hello I'm a mason. I want your rocks!");
         int needsAmount = 10;
         int reward = 7;
+        Debug.Log(player.Inventory.InventoryHelper.Count);
 
-        if (player.HowManyRessources(Ressource.ressourceType.rock) >= needsAmount)
+        if (player.HowManyRessources<Rock>() >= needsAmount)
         {
-            foreach (var item in player.Inventory)
+            List<Ressource> ressources = new List<Ressource>();
+
+            foreach (var item in player.Inventory.InventoryHelper)
             {
-                if (item.RessourceTypeOfObject == Ressource.ressourceType.rock)
+                if (item.GetType() == typeof(Rock) && needsAmount > 0)
                 {
-                    player.Inventory.Remove(item);
                     needsAmount--;
                 }
-
-                if (needsAmount == 0)
+                else
                 {
-                    break;
+                    ressources.Add(item);
                 }
             }
+
+            player.Inventory.InventoryHelper = ressources;
+            
             for (int i = 0; i < reward; i++)
             {
-                player.Inventory.Add(new Gold());
+                player.Inventory.InventoryHelper.Add(new Gold());
             }
 
         }
+        Debug.Log(player.Inventory.InventoryHelper.Count);
 
-        
 
-        
+
     }
 }

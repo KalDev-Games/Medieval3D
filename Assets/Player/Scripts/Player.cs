@@ -32,7 +32,7 @@ public class Player : MonoBehaviour
     public AnimationCurve Regeneration { get => regeneration; }
     public float Hunger { get => hunger;}
     public static int LastUI { get => lastUI; set => lastUI = value; }
-    public List<Ressource> Inventory { get => inventory; set => inventory = value; }
+    public Inventory Inventory { get => inventory; set => inventory = value; }
 
     private NonMovementControls controls;
 
@@ -46,7 +46,8 @@ public class Player : MonoBehaviour
 
     [Header("Inventory")]
     [SerializeField]
-    private List<Ressource> inventory;
+    private InventoryUI inventoryUI;
+    private Inventory inventory = new Inventory();
 
     [Header("GUI")]
     [SerializeField]
@@ -95,6 +96,7 @@ public class Player : MonoBehaviour
         health = 100;
         hunger = 100;
         Endurance = 100;
+        UpdateUI();
     }
 
 
@@ -121,29 +123,16 @@ public class Player : MonoBehaviour
         {
             if (hit.transform.GetComponent<Loot>())
             {
-                try
-                {
-                    Debug.Log(hit.transform.name);
-                    Debug.Log(hit.transform.GetComponent<Loot>().ressource.GetType());
-                }
-                catch (Exception)
-                {
-                    hit.transform.name += " error";                    
-                }
-                
-                if (hit.transform.GetComponent<Loot>().ressource.GetType().Equals(typeof(Food)))
+                //Debug.Log(hit.transform.GetComponent<Loot>().ressource.GetType());
+                if (hit.transform.GetComponent<Loot>().ressource is Food)
                 {
                     food = (Food)hit.transform.GetComponent<Loot>().ressource;
                     obj = hit.transform.gameObject;
                 }
-                else if (hit.transform.GetComponent<Loot>().ressource.GetType().Equals(typeof(Materials)))
+                else if (hit.transform.GetComponent<Loot>().ressource is Materials)
                 {
                     material = (Materials)hit.transform.GetComponent<Loot>().ressource;
                     obj = hit.transform.gameObject;
-                }
-                else if (hit.transform.GetComponent<NPC>())
-                {
-                    npc = hit.transform.GetComponent<NPC>();
                 }
                 else
                 {
@@ -152,6 +141,10 @@ public class Player : MonoBehaviour
                     npc = null;
                     obj = null;
                 }
+            }
+            else if (hit.transform.GetComponent<NPC>())
+            {
+                npc = hit.transform.GetComponent<NPC>();
             }
 
             // Do something with the object that was hit by the raycast.
@@ -224,36 +217,56 @@ public class Player : MonoBehaviour
         {
             material.id = new IdInfo(0);
 
-            Ressource rsc = material.DeepCopy();
+            
 
-            Debug.Log(rsc.GetType());
-            inventory.Add(rsc);
+            
+
+            for (int i = 0; i < material.AmountOfRessources; i++)
+            {
+                Ressource rsc = (Ressource)Activator.CreateInstance(material.GetType());
+                inventory.InventoryHelper.Add(rsc);
+            }
+           
+            
 
             Destroy(obj);
             material = null;
+            Debug.Log(inventory.InventoryHelper.Count);
+
         }
         #endregion
 
         if (npc != null)
         {
             npc.Trade(this);
+            npc = null;
         }
+
+        UpdateUI();
     }
 
 
-    public int HowManyRessources(Materials.ressourceType whatKind)
+    public int HowManyRessources<T>()
     {
         int counter = 0;
-        
 
-        for (int i = 0; i < inventory.Count; i++)
+        for (int i = 0; i < inventory.InventoryHelper.Count; i++)
         {
-            if (inventory[i].Equals(whatKind))
+            //Debug.Log(inventory.InventoryHelper[i].GetType() is T);
+            if (inventory.InventoryHelper[i].GetType().Equals(typeof(T)))
             {
                 counter++;
             }
         }
-
+        //Debug.Log(counter);
         return counter;
+    }
+
+    private void UpdateUI()
+    {
+        inventoryUI.DisplayAmountGold.text = HowManyRessources<Gold>().ToString();
+        inventoryUI.DisplayAmountWood.text = HowManyRessources<Wood>().ToString();
+        inventoryUI.DisplayAmountRocks.text = HowManyRessources<Rock>().ToString();
+        
     }
 }
