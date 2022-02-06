@@ -4,11 +4,13 @@ using UnityEngine;
 
 public class Rock : Materials
 {
-    Rock()
+    public Rock()
     {
         System.Random r = new System.Random();
-        ressourceTyp = ressourceType.wood;
+        ressourceTyp = ressourceType.rock;
         hitsNecessary = r.Next(3, 5);
         amountOfRessources = r.Next(3, 5);
     }
+
+    
 }

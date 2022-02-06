@@ -103,11 +103,13 @@ public class WorldGenerator : MonoBehaviour
         isLoading = true;
         progressBar.value = 0;
         whatAmIDoing.text = "Generating World";
-        StartCoroutine(RunGeneratingWorld());
+        //StartCoroutine(RunGeneratingWorld());
+        Setup();
         //StartCoroutine(RunLakeGeneration());
         CreateSeas();
         whatAmIDoing.text = "Generating castles";
-        StartCoroutine(RunGeneration());
+        //StartCoroutine(RunGeneration());
+        CalculateCastlePositions();
         //CalculateCastlePositions();
         isLoading = false;
         panelGameUI.SetActive(true);
@@ -135,6 +137,12 @@ public class WorldGenerator : MonoBehaviour
 
 
     private IEnumerator RunGeneratingWorld()
+    {
+        Setup();
+        yield return null;
+    }
+
+    private void Setup()
     {
         rarityOfCastle = worldSize / rarityOfCastle;
 
@@ -203,7 +211,7 @@ public class WorldGenerator : MonoBehaviour
                             break;
                         }
 
-                        
+
 
                         /*
                         if ((random == 0 || random >= 7) && z == 0 && randomTrees <= 3)
@@ -243,9 +251,8 @@ public class WorldGenerator : MonoBehaviour
 
         UpdateChunks(0, 0);
         progressBar.value = 50;
-        yield return null;
     }
-  
+
 
 
 
@@ -827,26 +834,26 @@ public class WorldGenerator : MonoBehaviour
         switch (id)
         {
             case 0:
-                return sPropPrefabs[0];
-            case 1:
-                return sPropPrefabs[1];
+                return AddLooting(new Wood(), sPropPrefabs[0]);
+            case 1: 
+                return AddLooting(new Wood(), sPropPrefabs[1]);
             case 2:
-                return sPropPrefabs[2];
+                return AddLooting(new Wood(), sPropPrefabs[2]);
             case 3:
-                return sPropPrefabs[3];
+                return AddLooting(new Wood(), sPropPrefabs[3]);
             case 4:
-                return sPropPrefabs[4];
+                return AddLooting(new Corn(), sPropPrefabs[4]);
             case 5:
-                return sPropPrefabs[5];
+                return AddLooting(new Carot(), sPropPrefabs[5]);
             case 6:
-                return sPropPrefabs[6];
+                return AddLooting(new Rock(), sPropPrefabs[6]);
             case 7:
-                return sPropPrefabs[7];
+                return AddLooting(new Rock(), sPropPrefabs[7]);
             case 8:
-                return sPropPrefabs[8];
+                return AddLooting(new Rock(), sPropPrefabs[8]);
             case 9:
-                return sPropPrefabs[9];
-
+                return AddLooting(new Rock(), sPropPrefabs[9]);
+                
             //Nature Elements
             case 1001:
                 return sNatureElementsPrefabs[0];
@@ -869,8 +876,20 @@ public class WorldGenerator : MonoBehaviour
             case 1010:
                 return sNatureElementsPrefabs[9];
             default:
-                return sPropPrefabs[0];
+                return AddLooting(new Wood(), sPropPrefabs[0]);
         }
+    }
+
+    private static GameObject AddLooting(Ressource rsc, GameObject gObj)
+    {
+        GameObject newGObj = gObj;
+        newGObj.GetComponent<Loot>().ressource = rsc;
+        if (newGObj.GetComponent<Loot>().ressource != null)
+        {
+            newGObj.GetComponent<Loot>().display = true;
+        }
+                
+        return newGObj;
     }
 
 

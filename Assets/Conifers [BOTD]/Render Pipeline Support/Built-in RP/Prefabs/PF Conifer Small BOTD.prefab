@@ -175,7 +175,7 @@ GameObject:
   - component: {fileID: 4689083990643298}
   - component: {fileID: 205709636835153214}
   - component: {fileID: 136614995598757014}
-  - component: {fileID: 3204806438498858020}
+  - component: {fileID: 3566251782575019360}
   m_Layer: 0
   m_Name: PF Conifer Small BOTD
   m_TagString: Untagged
@@ -241,7 +241,7 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0.9, z: 0}
---- !u!114 &3204806438498858020
+--- !u!114 &3566251782575019360
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -250,7 +250,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1364922359172550}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 02c8f36c24ecd6b40925615ea1344388, type: 3}
+  m_Script: {fileID: 11500000, guid: 791e75f0e751f8945ad74d3954a743f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1500231203828324

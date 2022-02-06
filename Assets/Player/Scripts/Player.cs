@@ -119,31 +119,40 @@ public class Player : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit))
         {
-            
-
-            if (hit.transform.GetComponent<Food>())
+            if (hit.transform.GetComponent<Loot>())
             {
-                food = hit.transform.GetComponent<Food>();
-                obj = hit.transform.gameObject;
+                try
+                {
+                    Debug.Log(hit.transform.name);
+                    Debug.Log(hit.transform.GetComponent<Loot>().ressource.GetType());
+                }
+                catch (Exception)
+                {
+                    hit.transform.name += " error";                    
+                }
+                
+                if (hit.transform.GetComponent<Loot>().ressource.GetType().Equals(typeof(Food)))
+                {
+                    food = (Food)hit.transform.GetComponent<Loot>().ressource;
+                    obj = hit.transform.gameObject;
+                }
+                else if (hit.transform.GetComponent<Loot>().ressource.GetType().Equals(typeof(Materials)))
+                {
+                    material = (Materials)hit.transform.GetComponent<Loot>().ressource;
+                    obj = hit.transform.gameObject;
+                }
+                else if (hit.transform.GetComponent<NPC>())
+                {
+                    npc = hit.transform.GetComponent<NPC>();
+                }
+                else
+                {
+                    food = null;
+                    material = null;
+                    npc = null;
+                    obj = null;
+                }
             }
-            else if (hit.transform.GetComponent<Materials>())
-            {
-                material = hit.transform.GetComponent<Materials>();
-                obj = hit.transform.gameObject;
-            }
-            else if (hit.transform.GetComponent<NPC>())
-            {
-                npc = hit.transform.GetComponent<NPC>();
-            }
-            else
-            {
-                food = null;
-                material = null;
-                npc = null;
-                obj = null;
-            }
-            
-          
 
             // Do something with the object that was hit by the raycast.
         }
@@ -215,10 +224,12 @@ public class Player : MonoBehaviour
         {
             material.id = new IdInfo(0);
 
-            Ressource rsc = material.DeepCopy();
+            Materials newMat = (Materials)Activator.CreateInstance(material.GetType());
 
-            Debug.Log(rsc.GetType());
-            inventory.Add(rsc);
+            //Ressource rsc = material.DeepCopy();
+
+            //Debug.Log(rsc.GetType());
+            inventory.Add(newMat);
 
             Destroy(obj);
             material = null;

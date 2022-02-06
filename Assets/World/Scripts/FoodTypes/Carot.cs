@@ -5,7 +5,7 @@ using UnityEngine;
 public class Carot : Food
 {
     // Start is called before the first frame update
-    Carot()
+    public Carot()
     {
         type = FoodType.carot;
         saturationBonus = 2;

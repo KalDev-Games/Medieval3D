@@ -267,7 +267,7 @@ GameObject:
   - component: {fileID: 4534264641828652}
   - component: {fileID: 205477677417311662}
   - component: {fileID: 136397860403507302}
-  - component: {fileID: -5724954345358266809}
+  - component: {fileID: 8546084420870396475}
   m_Layer: 0
   m_Name: PF Conifer Bare BOTD
   m_TagString: Untagged
@@ -333,7 +333,7 @@ CapsuleCollider:
   m_Height: 6
   m_Direction: 1
   m_Center: {x: 0, y: 2.5, z: 0}
---- !u!114 &-5724954345358266809
+--- !u!114 &8546084420870396475
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -342,6 +342,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 1743353957770956}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 02c8f36c24ecd6b40925615ea1344388, type: 3}
+  m_Script: {fileID: 11500000, guid: 791e75f0e751f8945ad74d3954a743f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

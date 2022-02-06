@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Wood : Materials
 {
-    Wood()
+    public Wood()
     {
         System.Random r = new System.Random();
         ressourceTyp = ressourceType.wood;

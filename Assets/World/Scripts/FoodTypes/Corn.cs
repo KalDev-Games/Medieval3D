@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Corn : Food
 {
-    Corn()
+    public Corn()
     {
         type = FoodType.corn;
         saturationBonus = 5;

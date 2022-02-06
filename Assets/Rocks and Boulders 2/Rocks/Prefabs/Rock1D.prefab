@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3300000}
   - component: {fileID: 2300000}
   - component: {fileID: 6500000}
-  - component: {fileID: -7888117534942537362}
+  - component: {fileID: -2614476267861938396}
   m_Layer: 0
   m_Name: Rock1D
   m_TagString: Untagged
@@ -96,7 +96,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.79, y: 1.03, z: 1.1}
   m_Center: {x: 0, y: 0.2, z: 0}
---- !u!114 &-7888117534942537362
+--- !u!114 &-2614476267861938396
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -105,6 +105,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 100000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aea93c4ca580bdd4493a8b37b4df3540, type: 3}
+  m_Script: {fileID: 11500000, guid: 791e75f0e751f8945ad74d3954a743f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

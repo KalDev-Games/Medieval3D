@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Ressource : MonoBehaviour
+public class Ressource 
 {
     // Start is called before the first frame update
     public enum ressourceType
