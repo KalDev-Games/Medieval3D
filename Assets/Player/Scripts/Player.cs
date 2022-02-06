@@ -224,12 +224,10 @@ public class Player : MonoBehaviour
         {
             material.id = new IdInfo(0);
 
-            Materials newMat = (Materials)Activator.CreateInstance(material.GetType());
+            Ressource rsc = material.DeepCopy();
 
-            //Ressource rsc = material.DeepCopy();
-
-            //Debug.Log(rsc.GetType());
-            inventory.Add(newMat);
+            Debug.Log(rsc.GetType());
+            inventory.Add(rsc);
 
             Destroy(obj);
             material = null;
