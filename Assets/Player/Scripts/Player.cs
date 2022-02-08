@@ -211,7 +211,7 @@ public class Player : MonoBehaviour
         if (material != null && material.HitsTaken < material.HitsNecessary)
         {
             material.HitsTaken++;
-            Debug.Log("Hit");
+            //Debug.Log("Hit");
 
         } else if (material != null && material.HitsTaken == material.HitsNecessary)
         {
@@ -231,7 +231,7 @@ public class Player : MonoBehaviour
 
             Destroy(obj);
             material = null;
-            Debug.Log(inventory.InventoryHelper.Count);
+            //Debug.Log(inventory.InventoryHelper.Count);
 
         }
         #endregion

@@ -23,6 +23,9 @@ public class WorldGenerator : MonoBehaviour
     private List<GameObject> worldTiles;
     public static List<GameObject> sWorldTiles;
     [SerializeField]
+    private List<GameObject> worldTilesVillage;
+    public static List<GameObject> sWorldTilesVillage;
+    [SerializeField]
     private List<GameObject> worldTilesWater;
     public static List<GameObject> sWorldTilesWater;
     [SerializeField]
@@ -66,6 +69,21 @@ public class WorldGenerator : MonoBehaviour
     [SerializeField]
     private int rarityOfLake = 16; //the higher this value, the less castles spawn
 
+    [Header("Villages")]
+    [SerializeField]
+    private int maxSizeOfVillage = 6;
+    [SerializeField]
+    private int amountOfVillages = 5;
+    [SerializeField]
+    private float maxRatioHousesAndEmpty = 0.75f;
+    private Dictionary<Vector2, Chunk[,]> allVillages = new Dictionary<Vector2, Chunk[,]>();
+
+
+    [Header("Ways")]
+    [SerializeField]
+    private List<GameObject> wayTile;
+    private static List<GameObject> sWayTile;
+
     [Header("Debugging")]
     [SerializeField]
     private float differenceX;
@@ -79,6 +97,8 @@ public class WorldGenerator : MonoBehaviour
     private List<Chunk> newChunksBuildings;
     [SerializeField]
     private List<Chunk> newChunksProps;
+    [SerializeField]
+    private List<Vector2> positionOfWayTiles;
 
     [Header("Loading Screen")]
     [SerializeField]
@@ -106,11 +126,17 @@ public class WorldGenerator : MonoBehaviour
         //StartCoroutine(RunGeneratingWorld());
         Setup();
         //StartCoroutine(RunLakeGeneration());
-        CreateSeas();
+        
+        
         whatAmIDoing.text = "Generating castles";
         //StartCoroutine(RunGeneration());
-        CalculateCastlePositions();
         //CalculateCastlePositions();
+        //CalculateCastlePositions();
+        GenerateVillages();
+        
+        GenerateWays();
+
+        //CreateSeas();
         isLoading = false;
         panelGameUI.SetActive(true);
         Player.LastUI = 1;
@@ -150,6 +176,8 @@ public class WorldGenerator : MonoBehaviour
         sWorldTiles = worldTiles;
         sNatureElementsPrefabs = natureElementsPrefabs;
         sWorldTilesWater = worldTilesWater;
+        sWorldTilesVillage = worldTilesVillage;
+        sWayTile = wayTile;
 
         int median = worldSize / 2;
 
@@ -253,9 +281,245 @@ public class WorldGenerator : MonoBehaviour
         progressBar.value = 50;
     }
 
+    #region Villages
+
+    private void GenerateVillages()
+    {
+        Chunk[,] villageArea;
+        for (int i = 0; i < amountOfVillages; i++)
+        {
+            villageArea = new Chunk[maxSizeOfVillage, maxSizeOfVillage];
+            int xPos = Random.Range(0, worldSize - 50);
+            int yPos = Random.Range(0, worldSize - 50);
+            Debug.Log("New village at " + (new Vector2(xPos - GetWorldSizeMedian(), yPos - GetWorldSizeMedian()) * 8)); //Output the world coordinates
+
+            while (xPos + maxSizeOfVillage > worldSize && yPos + maxSizeOfVillage > worldSize)
+            {
+                xPos = Random.Range(0, worldSize - 50);
+                yPos = Random.Range(0, worldSize - 50);
+
+            }
+
+            for (int x = 0; x < maxSizeOfVillage; x++)
+            {
+                for (int y = 0; y < maxSizeOfVillage; y++)
+                {
+                    villageArea[x,y] = model[x + xPos, y + yPos];
+                    ClearTileOfProps(villageArea[x, y]);
+                }
+            }
+
+            int amountHouses = Random.Range((int)(Mathf.Pow(maxSizeOfVillage, 2) * maxRatioHousesAndEmpty/2), 
+                (int)(Mathf.Pow(maxSizeOfVillage, 2) * maxRatioHousesAndEmpty)) + 1;
+
+            List<Chunk> chunksForHouses = new List<Chunk>();
+            for (int j = 0; j < amountHouses; j++)
+            {
+                int _coordinateX;
+                int _coordinateY;
+                Chunk temp;
+
+                do
+                {
+                    _coordinateX = Random.Range(0, maxSizeOfVillage);
+                    _coordinateY = Random.Range(0, maxSizeOfVillage);
+
+                    temp = villageArea[_coordinateX, _coordinateY];
+                    
+
+                } while (chunksForHouses.Contains(temp));
+                chunksForHouses.Add(temp);
+
+            }
+
+            for (int n = 0; n < amountHouses; n++)
+            {
+                chunksForHouses[n].SetTypeOfObject(1,3000);
+                chunksForHouses[n].SetRotationOfLayer(Quaternion.AngleAxis(Random.Range(0,4) * 90, Vector3.up),1);
+            }
+
+
+            //Add exactly one church per village
+            int coordinateX = Random.Range(0, maxSizeOfVillage);
+            int coordinateY = Random.Range(0, maxSizeOfVillage);
+
+            for (int left = -1; left <= 1; left++)
+            {
+                for (int forward = -1; forward <= 1; forward++)
+                {
+                    try
+                    {
+                        if (left == 0 && forward == 0)
+                        {
+                            villageArea[coordinateX + forward, coordinateY + left].SetTypeOfObject(0, 3001);
+                            villageArea[coordinateX + forward, coordinateY + left].SetTypeOfObject(1, 0);
+                            villageArea[coordinateX + forward, coordinateY + left].SetRotationOfLayer(Quaternion.AngleAxis(Random.Range(0, 4) * 90, Vector3.up), 0);
+                        }
+                        else
+                        {
+                            villageArea[coordinateX + forward, coordinateY + left].SetTypeOfObject(1, 0);
 
 
 
+                        }
+                    }
+                    catch (System.Exception)
+                    {
+
+                        continue;
+                    }
+                    
+                    
+                }
+            }
+
+
+            allVillages.Add(new Vector2(xPos,yPos), villageArea);
+            //Debug.Log("Added village at " + new Vector2(xPos,yPos));
+            Vector2 pos = model[xPos, yPos].GetCoordinates() + new Vector2(GetWorldSizeMedian(), GetWorldSizeMedian());
+            player.transform.position = new Vector3(pos.x,8,pos.y); ;
+        }
+    }
+
+    #endregion
+
+
+
+    #region ways
+
+    private void GenerateWays()
+    {
+        if (amountOfVillages < 2)
+        {
+            return;
+        }
+
+        List<Chunk> wayFromVillage; // way from village
+        List<Chunk> allWayTiles = new List<Chunk>(); // way from village
+        List<List<Chunk>> allWays = new List<List<Chunk>>(); //all ways
+
+
+        foreach (KeyValuePair<Vector2, Chunk[,]> entry in allVillages)
+        {
+            Vector2 startingPointGlobal = entry.Key; //Coordinate of chunk in model
+            //Debug.LogWarning(startingPointGlobal);
+            int startingPointNorth = (int)(Random.Range(0, maxSizeOfVillage) + startingPointGlobal.y);
+            int startingPointSouth = (int)(Random.Range(0, maxSizeOfVillage) + startingPointGlobal.y);
+            int startingPointWest = (int)(Random.Range(0, maxSizeOfVillage) + startingPointGlobal.x);
+            int startingPointEast = (int)(Random.Range(0, maxSizeOfVillage) + startingPointGlobal.x);
+            Debug.LogWarning(startingPointGlobal + "\n" 
+                + startingPointNorth + "\n"
+                + startingPointEast + "\n"
+                + startingPointSouth + "\n"
+                + startingPointWest);
+            wayFromVillage = new List<Chunk>();
+
+
+            //East
+            int difference = (int)(worldSize - startingPointGlobal.x + maxSizeOfVillage - GetWorldSizeMedian());
+            Debug.LogWarning(allWayTiles.Count);
+            for (int i = 0; i < difference; i++)
+            {
+
+                try
+                {
+                    allWayTiles.Add(model[(int)(startingPointGlobal.x + i + maxSizeOfVillage), startingPointEast]);
+                }
+                catch (System.Exception)
+                {
+
+                    Debug.LogWarning("East " + i);
+                }
+
+            }
+
+            //West
+            difference = (int)startingPointGlobal.x;
+            Debug.LogWarning(allWayTiles.Count);
+            for (int i = 0; i < difference; i++)
+            {
+                try
+                {
+                    allWayTiles.Add(model[(int)(startingPointGlobal.x - i), startingPointWest]);
+                }
+                catch (System.Exception)
+                {
+
+                    Debug.LogWarning("West " + i);
+                }
+
+
+            }
+
+            //North 256 10 6 128
+            difference = (int)(worldSize - startingPointGlobal.y + maxSizeOfVillage - GetWorldSizeMedian());
+            Debug.LogWarning(allWayTiles.Count);
+            for (int i = 0; i < difference; i++)
+            {
+                try
+                {
+                    allWayTiles.Add(model[startingPointNorth, (int)(startingPointGlobal.y + i + maxSizeOfVillage)]);
+                    model[startingPointNorth, (int)(startingPointGlobal.y + i + maxSizeOfVillage)].SetRotationOfLayer(Quaternion.AngleAxis(90, Vector3.up), 0);
+                }
+                catch (System.Exception)
+                {
+
+                    Debug.LogWarning("North " + i);
+                }
+
+
+            }
+
+            //South
+            difference = (int)startingPointGlobal.y;
+            Debug.LogWarning(allWayTiles.Count);
+            for (int i = 0; i < difference; i++)
+            {
+
+                try
+                {
+                    allWayTiles.Add(model[startingPointSouth, (int)(startingPointGlobal.y - i)]);
+                    model[startingPointSouth, (int)(startingPointGlobal.y - i)].SetRotationOfLayer(Quaternion.AngleAxis(90,Vector3.up),0);
+                }
+                catch (System.Exception)
+                {
+
+                    Debug.LogWarning("South " + i); ;
+                }
+
+            }
+            Debug.Log(startingPointGlobal);
+            Debug.LogWarning(allWayTiles.Count);
+            allWays.Add(wayFromVillage);
+        }
+
+        Debug.LogWarning(allWayTiles.Count);
+        foreach (Chunk tile in allWayTiles)
+        {
+            tile.SetTypeOfObject(0,SetTypeOfWaySegment());
+            positionOfWayTiles.Add(tile.GetCoordinates() * 8);
+            ClearTileOfProps(tile);
+        }
+
+
+    }
+
+
+    private int SetTypeOfWaySegment()
+    {
+        int random = Random.Range(0,100);
+
+        if (random > 90)
+        {
+            return -1001;
+        }
+        else
+        {
+            return -1000;
+        }
+    }
+
+    #endregion
     // Update is called once per frame
     void Update()
     {
@@ -524,6 +788,7 @@ public class WorldGenerator : MonoBehaviour
     }
     //p = stretch *(-apex)^2+100
 
+    #region lake
     private void CreateSeas()
     {
         int amountLakes = worldSize / rarityOfLake;
@@ -691,7 +956,7 @@ public class WorldGenerator : MonoBehaviour
     }
 
 
-
+    #endregion
 
 
     private void UpdateChunks(int playerX, int playerY)
@@ -802,6 +1067,12 @@ public class WorldGenerator : MonoBehaviour
         GameObject tile;
         switch (type)
         {
+            case -1000:
+                tile = sWayTile[0];
+                break;
+            case -1001:
+                tile = sWayTile[1];
+                break;
             case 0:
                 tile = sWorldTiles[0]; //Air
                 break;
@@ -831,6 +1102,12 @@ public class WorldGenerator : MonoBehaviour
                 break;
             case 2002:
                 tile = sWorldTilesWater[2];
+                break;
+            case 3000:
+                tile = sWorldTilesVillage[0];
+                break;
+            case 3001:
+                tile = sWorldTilesVillage[1]; //Church
                 break;
             default:
                 return sWorldTiles[1];
