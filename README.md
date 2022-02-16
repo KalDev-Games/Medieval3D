@@ -1,0 +1,2 @@
+# Medieval3D
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/bb36b10b0dcd490280bb6e084c6b244c)](https://app.codacy.com/gh/KalDev-Games/Medieval3D?utm_source=github.com&utm_medium=referral&utm_content=KalDev-Games/Medieval3D&utm_campaign=Badge_Grade_Settings)
